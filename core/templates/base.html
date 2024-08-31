@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NDE Digital{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4CAF50',
+                        secondary: '#FFEB3B',
+                        accent: '#F44336',
+                        neutral: '#9E9E9E',
+                        accent2: '#f7f4a5',
+                    }
+                }
+            }
+        }
+    </script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="flex flex-col min-h-screen bg-gray-100">
+    <header class="bg-white shadow-md" x-data="{ isOpen: false }">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center">
+                    <a href="#" class="flex-shrink-0">
+                        <img class="h-20 w-auto" src="{% static 'logos/nde_logo.png' %}" alt="NDE Logo">
+                    </a>
+                    {% if user.is_authenticated %}  
+                    <div class="hidden md:block ml-10">
+                        <div class="flex items-baseline space-x-4">
+                            <a href="#" class="text-gray-700 hover:bg-primary hover:text-white px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                            <a href="#" class="text-gray-700 hover:bg-primary hover:text-white px-3 py-2 rounded-md text-sm font-medium">About</a>
+                            <a href="#" class="text-gray-700 hover:bg-primary hover:text-white px-3 py-2 rounded-md text-sm font-medium">Programmes</a>
+                            <a href="#" class="text-gray-700 hover:bg-primary hover:text-white px-3 py-2 rounded-md text-sm font-medium">News</a>
+                            <a href="#" class="text-gray-700 hover:bg-primary hover:text-white px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+              
+                        <div class="ml-4 flex items-center md:ml-6">
+                            <a href="{% url 'dashboard' %}" class="text-gray-700 hover:bg-primary hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+                            <a href="{% url 'logout' %}" class="text-gray-700 hover:bg-primary hover:text-white px-3 py-2 rounded-md text-sm font-medium">Logout</a>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-gray-700 hover:bg-primary hover:text-white px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                    {% endif %}
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button @click="isOpen = !isOpen" type="button" class="bg-gray-100 inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-white hover:bg-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" :class="{'hidden': isOpen, 'block': !isOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="hidden h-6 w-6" :class="{'block': isOpen, 'hidden': !isOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="md:hidden" id="mobile-menu" x-show="isOpen" @click.away="isOpen = false">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#" class="text-gray-700 hover:bg-primary hover:text-white block px-3 py-2 rounded-md text-base font-medium">Home</a>
+                <a href="#" class="text-gray-700 hover:bg-primary hover:text-white block px-3 py-2 rounded-md text-base font-medium">About</a>
+                <a href="#" class="text-gray-700 hover:bg-primary hover:text-white block px-3 py-2 rounded-md text-base font-medium">Programmes</a>
+                <a href="#" class="text-gray-700 hover:bg-primary hover:text-white block px-3 py-2 rounded-md text-base font-medium">News</a>
+                <a href="#" class="text-gray-700 hover:bg-primary hover:text-white block px-3 py-2 rounded-md text-base font-medium">Contact</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="text-gray-700 hover:bg-primary hover:text-white block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
+                    <a href="{% url 'logout' %}" class="text-gray-700 hover:bg-primary hover:text-white block px-3 py-2 rounded-md text-base font-medium">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="text-gray-700 hover:bg-primary hover:text-white block px-3 py-2 rounded-md text-base font-medium">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-green-800 text-white">
+        <div class="max-w-4xl mx-auto px-2 sm:px-3 lg:px-3 py-5">
+            <div class="mt-3 text-center text-m">
+                &copy; {% now "Y" %} National Directorate of Employment. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
