@@ -28,7 +28,7 @@ class EmployeeManager(BaseUserManager):
 
 class Role(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
+    description = models.CharField(max_length= 50, blank=True)
     is_system_role = models.BooleanField(default=False)  # To distinguish between system-defined and custom roles
 
     def __str__(self):
@@ -83,44 +83,17 @@ class Employee(AbstractUser):
     access_type = models.CharField(max_length=10, choices=ACCESS_TYPES, default='STAFF', verbose_name="Access Type")
 
     # Role and Department
-    role = models.ForeignKey('Role', on_delete=models.SET_NULL, null=True, blank=True, related_name='employees', verbose_name="Role")
-    department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, blank=True, related_name='employees', verbose_name="Department")
-
-    # Location
-    zone = models.ForeignKey('Zone', on_delete=models.SET_NULL, null=True, blank=True, related_name='employees', verbose_name="Zone")
-    state = models.ForeignKey('State', on_delete=models.SET_NULL, null=True, blank=True, related_name='employees', verbose_name="State")
-    lga = models.ForeignKey('LGA', on_delete=models.SET_NULL, null=True, blank=True, related_name='employees', verbose_name="LGA")
+    role = models.ForeignKey('Role', on_delete=models.DO_NOTHING, null=True, blank=True, related_name='employees', verbose_name="Role")
+    department = models.ForeignKey('Department', on_delete=models.DO_NOTHING, null=True, blank=True, related_name='employees', verbose_name="Department")
 
     # Personal Information
     date_of_birth = models.DateField(null=True, blank=True, verbose_name="Date of Birth")
     gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], verbose_name="Gender")
-    marital_status = models.CharField(max_length=20, choices=[('Single', 'Single'), ('Married', 'Married'), ('Divorced', 'Divorced'), ('Widowed', 'Widowed')], verbose_name="Marital Status")
-    phone_number = models.CharField(max_length=15, blank=True, null=True, verbose_name="Phone Number")
-    address = models.TextField(blank=True, null=True, verbose_name="Address")
-
-    # Educational Information
-    highest_qualification = models.CharField(max_length=100, blank=True, null=True, verbose_name="Highest Qualification")
-    institution = models.CharField(max_length=200, blank=True, null=True, verbose_name="Institution")
-    year_of_graduation = models.IntegerField(null=True, blank=True, verbose_name="Year of Graduation")
-
+ 
     # Employment Information
     position = models.CharField(max_length=100, blank=True, null=True, verbose_name="Position")
     employment_status = models.CharField(max_length=20, choices=[('Active', 'Active'), ('Inactive', 'Inactive'), ('On Leave', 'On Leave')], default='Active', verbose_name="Employment Status")
     retirement_date = models.DateField(null=True, blank=True, verbose_name="Retirement Date")
-
-    # Spouse Information
-    spouse_name = models.CharField(max_length=200, blank=True, null=True, verbose_name="Spouse Name")
-    spouse_phone_number = models.CharField(max_length=15, blank=True, null=True, verbose_name="Spouse Phone Number")
-
-    # Next of Kin
-    next_of_kin_name = models.CharField(max_length=200, verbose_name="Next of Kin Name")
-    next_of_kin_relationship = models.CharField(max_length=50, verbose_name="Next of Kin Relationship")
-    next_of_kin_phone_number = models.CharField(max_length=15, verbose_name="Next of Kin Phone Number")
-
-    # Financial Information
-    bank_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Bank Name")
-    account_number = models.CharField(max_length=20, blank=True, null=True, verbose_name="Account Number")
-    bvn = models.CharField(max_length=11, blank=True, null=True, verbose_name="BVN")  # Bank Verification Number
 
     # Control Sections (No changes needed here)
     is_active = models.BooleanField(default=True)
@@ -151,7 +124,81 @@ class Employee(AbstractUser):
 
         super().save(*args, **kwargs)
 
+class EmployeeDetail(models.Model):
+    employee = models.OneToOneField(Employee, on_delete=models.CASCADE, related_name='details', verbose_name="Employee")
+    
+    # Personal Information
+    date_of_birth = models.DateField(null=True, blank=True, verbose_name="Date of Birth")
+    gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], verbose_name="Gender")
+    marital_status = models.CharField(max_length=20, choices=[('Single', 'Single'), ('Married', 'Married'), ('Divorced', 'Divorced'), ('Widowed', 'Widowed')], verbose_name="Marital Status")
+    phone_number = models.CharField(max_length=15, blank=True, null=True, verbose_name="Phone Number")
+    address = models.TextField(blank=True, null=True, verbose_name="Address")
+    
+    # Employment Information
+    employment_type = models.CharField(max_length=20, choices=[
+        ('Full Time', 'Full Time'),
+        ('Part Time', 'Part Time'),
+        ('Contract', 'Contract'),
+        ('Temporary', 'Temporary')
+    ], default='Full Time', verbose_name="Employment Type")
+    hire_date = models.DateField(null=True, blank=True, verbose_name="Hire Date")
+    
+    # Educational Information
+    highest_qualification = models.CharField(max_length=100, blank=True, null=True, verbose_name="Highest Qualification")
+    institution = models.CharField(max_length=200, blank=True, null=True, verbose_name="Institution")
+    year_of_graduation = models.IntegerField(null=True, blank=True, verbose_name="Year of Graduation")
+    
+    # Emergency Contact
+    emergency_contact_name = models.CharField(max_length=200, blank=True, null=True, verbose_name="Emergency Contact Name")
+    emergency_contact_relationship = models.CharField(max_length=50, blank=True, null=True, verbose_name="Emergency Contact Relationship")
+    emergency_contact_phone = models.CharField(max_length=15, blank=True, null=True, verbose_name="Emergency Contact Phone")
+    
+    # Financial Information
+    bank_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Bank Name")
+    account_number = models.CharField(max_length=20, blank=True, null=True, verbose_name="Account Number")
+    
+    # Additional Personal Information
+    nationality = models.CharField(max_length=50, blank=True, null=True, verbose_name="Nationality")
+    state_of_origin = models.CharField(max_length=50, blank=True, null=True, verbose_name="State of Origin")
+    local_government_area = models.CharField(max_length=100, blank=True, null=True, verbose_name="Local Government Area")
+    
+    # Additional Employment Information
+    employee_grade_level = models.CharField(max_length=20, blank=True, null=True, verbose_name="Employee Grade Level")
+    date_of_first_appointment = models.DateField(null=True, blank=True, verbose_name="Date of First Appointment")
+    date_of_present_appointment = models.DateField(null=True, blank=True, verbose_name="Date of Present Appointment")
+    
+    # Additional Educational Information
+    professional_qualifications = models.TextField(blank=True, null=True, verbose_name="Professional Qualifications")
+    
+    # Health Information
+    blood_group = models.CharField(max_length=5, blank=True, null=True, verbose_name="Blood Group")
+    allergies = models.TextField(blank=True, null=True, verbose_name="Allergies")
+    
+    # Additional Financial Information
+    pension_fund_administrator = models.CharField(max_length=100, blank=True, null=True, verbose_name="Pension Fund Administrator")
+    pension_account_number = models.CharField(max_length=20, blank=True, null=True, verbose_name="Pension Account Number")
+    
+    # Performance Information
+    last_promotion_date = models.DateField(null=True, blank=True, verbose_name="Last Promotion Date")
 
+    def __str__(self):
+        return f"Details for {self.employee.get_full_name()}"
+
+    class Meta:
+        verbose_name = "Employee Detail"
+        verbose_name_plural = "Employee Details"
+
+
+class EmployeeChangeLog(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='change_logs')
+    field_name = models.CharField(max_length=100)
+    old_value = models.TextField(null=True, blank=True)
+    new_value = models.TextField(null=True, blank=True)
+    changed_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='changes_made')
+    change_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Change in {self.field_name} for {self.employee.get_full_name()}"
 
 class CustomPermission(models.Model):
     name = models.CharField(max_length=255)
@@ -278,5 +325,3 @@ class RetiredEmployeeDocument(models.Model):
 
     def __str__(self):
         return f"{self.retired_employee.employee.get_full_name()} - {self.document.title}"
-
-# Existing models like EmployeeInfoChangeLog, LeaveRequest, etc. remain unchanged
