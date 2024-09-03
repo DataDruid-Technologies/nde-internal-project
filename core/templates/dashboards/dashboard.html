@@ -1,116 +1,186 @@
 {% extends 'base_dashboard.html' %}
 {% load static %}
-{% load heroicons%}
-{% block title %}Dashboard - NDE Digital{% endblock %}
+{% load tailwind_tags %}
 
-{% block dashboard_content %}
-<div class="p-6">
-    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Dashboard</h1>
-    
-    <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        <!-- Employee Count Card -->
-        <div class="bg-white dark:bg-gray-700 overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
-                        {% heroicon_solid 'users' class="h-6 w-6 text-white" %}
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                                Total Employees
-                            </dt>
-                            <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                    {{ employee_count }}
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
+{% block title %}Dashboard - {{ user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-semibold text-gray-900 dark:text-white mb-6">
+        Welcome, {{ user.get_full_name }}
+    </h1>
+
+    <!-- Role-specific greeting -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {% if user.role == 'DG' %}
+                Director General Dashboard
+            {% elif user.role == 'DIR' %}
+                Director Dashboard
+            {% elif user.role == 'ZD' %}
+                Zonal Director Dashboard
+            {% elif user.role == 'HOD' %}
+                Head of Department Dashboard
+            {% elif user.role == 'HOU' %}
+                Head of Unit Dashboard
+            {% elif user.role == 'IT_ADMIN' %}
+                IT Admin Dashboard
+            {% else %}
+                Staff Dashboard
+            {% endif %}
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300">
+            {% if user.role == 'DG' %}
+                You have full access to all system features and reports.
+            {% elif user.role in 'DIR,ZD' %}
+                You can manage departments and view comprehensive reports.
+            {% elif user.role == 'HOD' %}
+                You can manage your department and view departmental reports.
+            {% elif user.role == 'HOU' %}
+                You can manage your unit and view unit-specific reports.
+            {% elif user.role == 'IT_ADMIN' %}
+                You have access to system management and configuration.
+            {% else %}
+                You can view your tasks and department updates.
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Total Employees</h3>
+            <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ total_employees }}</p>
         </div>
-
-        <!-- Department Count Card -->
-        <div class="bg-white dark:bg-gray-700 overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
-                        {% heroicon_solid 'building-office' class="h-6 w-6 text-white" %}
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                                Total Departments
-                            </dt>
-                            <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                    {{ department_count }}
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Departments</h3>
+            <p class="text-3xl font-bold text-green-600 dark:text-green-400">{{ total_departments }}</p>
         </div>
-
-        <!-- Project Count Card -->
-        <div class="bg-white dark:bg-gray-700 overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
-                        {% heroicon_solid 'briefcase' class="h-6 w-6 text-white" %}
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                                Total Projects
-                            </dt>
-                            <dd class="flex items-baseline">
-                                <div class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                    {{ project_count }}
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Active Projects</h3>
+            <p class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ active_projects }}</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Pending Tasks</h3>
+            <p class="text-3xl font-bold text-red-600 dark:text-red-400">{{ pending_tasks }}</p>
         </div>
     </div>
 
-    <!-- Recent Projects -->
-    <div class="mt-8">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Recent Projects</h2>
-        <div class="mt-4 bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
-            <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
-                {% for project in recent_projects %}
-                <li>
-                    <a href="#" class="block hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <div class="px-4 py-4 sm:px-6">
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">
-                                    {{ project.name }}
-                                </p>
-                                <div class="ml-2 flex-shrink-0 flex">
-                                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        {{ project.status }}
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="mt-2 sm:flex sm:justify-between">
-                                <div class="sm:flex">
-                                    <p class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                        {% heroicon_solid 'calendar' class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" %}
-                                        Start Date: {{ project.start_date|date:"M d, Y" }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
+    <!-- Role-specific content -->
+    {% if user.role == 'DG' %}
+        <!-- Director General specific content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Department Overview</h3>
+                <ul class="space-y-2">
+                    {% for dept in department_stats %}
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-300">{{ dept.name }}</span>
+                            <span class="font-semibold text-gray-900 dark:text-white">{{ dept.employee_count }} employees</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Hires</h3>
+                <ul class="space-y-2">
+                    {% for employee in recent_hires %}
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-300">{{ employee.get_full_name }}</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Joined: {{ employee.date_joined|date:"M d, Y" }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
+    {% elif user.role == 'DIR' or user.role == 'ZD' %}
+        <!-- Director and Zonal Director specific content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Managed Departments</h3>
+                <ul class="space-y-2">
+                    {% for dept in managed_departments %}
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-300">{{ dept.name }}</span>
+                            <span class="font-semibold text-gray-900 dark:text-white">{{ dept.employees.count }} employees</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Department Projects</h3>
+                <ul class="space-y-2">
+                    {% for project in department_projects %}
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-300">{{ project.name }}</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Start: {{ project.start_date|date:"M d, Y" }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% elif user.role == 'HOD' or user.role == 'HOU' %}
+        <!-- HOD and HOU specific content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Department: {{ department.name }}</h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-2">Total Employees: {{ department_employees }}</p>
+                <p class="text-gray-600 dark:text-gray-300">Pending Tasks: {{ pending_tasks }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Department Projects</h3>
+                <ul class="space-y-2">
+                    {% for project in department_projects %}
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-300">{{ project.name }}</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Status: {{ project.get_status_display }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% else %}
+        <!-- Regular staff and IT Admin specific content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">My Tasks</h3>
+                <ul class="space-y-2">
+                    {% for task in my_tasks %}
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-300">{{ task.title }}</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Due: {{ task.due_date|date:"M d, Y" }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">My Projects</h3>
+                <ul class="space-y-2">
+                    {% for project in my_projects %}
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-300">{{ project.name }}</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Status: {{ project.get_status_display }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Common section for all roles -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Announcements</h3>
+        <ul class="space-y-4">
+            {% for announcement in recent_announcements %}
+                <li>
+                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white">{{ announcement.title }}</h4>
+                    <p class="text-gray-600 dark:text-gray-300">{{ announcement.content|truncatewords:30 }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Posted on: {{ announcement.created_at|date:"M d, Y" }}</p>
+                </li>
+            {% empty %}
+                <li class="text-gray-600 dark:text-gray-300">No recent announcements.</li>
+            {% endfor %}
+        </ul>
     </div>
 </div>
 {% endblock %}

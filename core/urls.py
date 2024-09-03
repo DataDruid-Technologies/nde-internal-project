@@ -14,4 +14,14 @@ urlpatterns = [
     path('employee/<int:employee_id>/update/', views.employee_update, name='employee_update'),
     path('employee/<int:employee_id>/assign-role/', views.assign_role, name='assign_role'),
     path('profile/', views.profile, name='profile'),
+    
+    # Workflow URLs
+    path('workflow/steps/', views.workflow_step_list, name='workflow_step_list'),
+    path('workflow/steps/create/', views.workflow_step_create, name='workflow_step_create'),
+    path('workflows/', views.workflow_list, name='workflow_list'),
+    path('workflows/create/', views.workflow_create, name='workflow_create'),
+    path('workflows/<int:pk>/', views.workflow_detail, name='workflow_detail'),
+    path('workflow-instances/create/', views.workflow_instance_create, name='workflow_instance_create'),
+    path('workflow-instances/<int:pk>/', views.workflow_instance_detail, name='workflow_instance_detail'),
+
 ]

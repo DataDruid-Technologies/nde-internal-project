@@ -10,7 +10,7 @@
             <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                 Employee Information
             </h3>
-            <a href="{% url 'employee_update' employee.pk %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105">
+            <a href="{% url 'employee_update' employee_id=employee.employee_id %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105">
                 Edit Employee
             </a>
         </div>
@@ -79,7 +79,7 @@
                         Role
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
-                        {{ employee.details.role }}
+                        {{ employee.role.get_choices_display }}
                     </dd>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

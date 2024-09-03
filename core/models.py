@@ -1,7 +1,11 @@
 from django.contrib.auth.models import *
 from django.db import models
+from django.conf import settings
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class EmployeeManager(BaseUserManager):
     def create_user(self, employee_id, email, password=None, **extra_fields):
@@ -82,8 +86,17 @@ class Employee(AbstractUser):
     ]
     access_type = models.CharField(max_length=10, choices=ACCESS_TYPES, default='STAFF', verbose_name="Access Type")
 
-    # Role and Department
-    role = models.ForeignKey('Role', on_delete=models.DO_NOTHING, null=True, blank=True, related_name='employees', verbose_name="Role")
+    # Role and Department    
+    ROLE_CHOICES = [
+        ('DG', 'Director General'),
+        ('DIR', 'Director'),
+        ('ZD', 'Zonal Director'),
+        ('HOD', 'Head of Department'),
+        ('HOU', 'Head of Unit'),
+        ('STAFF', 'Staff'),
+        ('IT_ADMIN', 'IT Admin'),
+    ]
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='STAFF')
     department = models.ForeignKey('Department', on_delete=models.DO_NOTHING, null=True, blank=True, related_name='employees', verbose_name="Department")
 
     # Personal Information
@@ -125,36 +138,7 @@ class Employee(AbstractUser):
         super().save(*args, **kwargs)
 
 class EmployeeDetail(models.Model):
-    employee = models.OneToOneField(Employee, on_delete=models.CASCADE, related_name='details', verbose_name="Employee")
-    
-    # Personal Information
-    date_of_birth = models.DateField(null=True, blank=True, verbose_name="Date of Birth")
-    gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], verbose_name="Gender")
-    marital_status = models.CharField(max_length=20, choices=[('Single', 'Single'), ('Married', 'Married'), ('Divorced', 'Divorced'), ('Widowed', 'Widowed')], verbose_name="Marital Status")
-    phone_number = models.CharField(max_length=15, blank=True, null=True, verbose_name="Phone Number")
-    address = models.TextField(blank=True, null=True, verbose_name="Address")
-    
-    # Employment Information
-    employment_type = models.CharField(max_length=20, choices=[
-        ('Full Time', 'Full Time'),
-        ('Part Time', 'Part Time'),
-        ('Contract', 'Contract'),
-        ('Temporary', 'Temporary')
-    ], default='Full Time', verbose_name="Employment Type")
-    hire_date = models.DateField(null=True, blank=True, verbose_name="Hire Date")
-    
-    # Educational Information
-    highest_qualification = models.CharField(max_length=100, blank=True, null=True, verbose_name="Highest Qualification")
-    institution = models.CharField(max_length=200, blank=True, null=True, verbose_name="Institution")
-    year_of_graduation = models.IntegerField(null=True, blank=True, verbose_name="Year of Graduation")
-    
-    # Emergency Contact
-    emergency_contact_name = models.CharField(max_length=200, blank=True, null=True, verbose_name="Emergency Contact Name")
-    emergency_contact_relationship = models.CharField(max_length=50, blank=True, null=True, verbose_name="Emergency Contact Relationship")
-    emergency_contact_phone = models.CharField(max_length=15, blank=True, null=True, verbose_name="Emergency Contact Phone")
-    
-    # Financial Information
-    bank_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Bank Name")
+    employee = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='details')
     account_number = models.CharField(max_length=20, blank=True, null=True, verbose_name="Account Number")
     
     # Additional Personal Information
@@ -325,3 +309,121 @@ class RetiredEmployeeDocument(models.Model):
 
     def __str__(self):
         return f"{self.retired_employee.employee.get_full_name()} - {self.document.title}"
+
+User = get_user_model()
+
+class Project(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    status = models.CharField(max_length=20, choices=[
+        ('PLANNING', 'Planning'),
+        ('ACTIVE', 'Active'),
+        ('ON_HOLD', 'On Hold'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled')
+    ])
+    department = models.ForeignKey('Department', on_delete=models.CASCADE, related_name='projects')
+    team_members = models.ManyToManyField(User, related_name='projects')
+
+    def __str__(self):
+        return self.name
+
+class Task(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
+    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_tasks')
+    due_date = models.DateField()
+    status = models.CharField(max_length=20, choices=[
+        ('PENDING', 'Pending'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('OVERDUE', 'Overdue')
+    ])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+class Announcement(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    department = models.ForeignKey('Department', on_delete=models.CASCADE, related_name='announcements', null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcements')
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_global = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
+    
+class ChatMessage(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f'{self.sender} to {self.recipient}: {self.content[:50]}'
+
+    @classmethod
+    def delete_old_messages(cls):
+        thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
+        cls.objects.filter(timestamp__lt=thirty_days_ago).delete()
+
+class InboxMessage(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_inbox_messages')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_inbox_messages')
+    subject = models.CharField(max_length=255)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f'{self.sender} to {self.recipient}: {self.subject}'
+
+    @classmethod
+    def delete_old_messages(cls):
+        thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
+        cls.objects.filter(timestamp__lt=thirty_days_ago).delete()
+        
+
+User = get_user_model()
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message = models.CharField(max_length=255)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.user}: {self.message}'
+
+@receiver(post_save, sender=InboxMessage)
+def create_inbox_notification(sender, instance, created, **kwargs):
+    if created:
+        Notification.objects.create(
+            user=instance.recipient,
+            message=f'New message from {instance.sender}: {instance.subject}'
+        )
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    theme = models.CharField(max_length=20, choices=[('light', 'Light'), ('dark', 'Dark')], default='light')
+    notification_preferences = models.JSONField(default=dict)
+
+    def __str__(self):
+        return f'{self.user.get_full_name()} Profile'

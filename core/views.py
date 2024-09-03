@@ -1,3 +1,5 @@
+import csv
+import chardet
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, login_not_required, user_passes_test
@@ -6,7 +8,7 @@ from django.contrib import messages
 from .forms import *
 from .models import *
 # views.py
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 from django.db import transaction
 
@@ -40,37 +42,54 @@ def custom_logout(request):
     logout(request)
     return redirect('login')
 
+
 @login_required
 def dashboard_view(request):
-    # Get counts for various entities
-    employee_count = Employee.objects.count()
-    department_count = Department.objects.count()
-
-
-    # Get department distribution
-    department_distribution = Department.objects.annotate(employee_count=Count('employees')).values('name', 'employee_count')
-
-
+    user = request.user
     context = {
-        'employee_count': employee_count,
-        'department_count': department_count,
-        'department_distribution': department_distribution,
+        'user': user,
+        'total_employees': Employee.objects.count(),
+        'total_departments': Department.objects.count(),
+        'active_projects': Project.objects.filter(status='ACTIVE').count(),
+        'pending_tasks': Task.objects.filter(status='PENDING').count(),
+        'recent_announcements': Announcement.objects.order_by('-created_at')[:5],
     }
+
+    if user.role == 'DG':
+        context.update({
+            'department_stats': Department.objects.annotate(employee_count=Count('employees')),
+            'recent_hires': Employee.objects.order_by('-date_joined')[:5],
+        })
+    elif user.role in ['DIR', 'ZD']:
+        context.update({
+            'managed_departments': Department.objects.filter(director=user),
+            'department_projects': Project.objects.filter(department__director=user).order_by('-start_date')[:5],
+        })
+    elif user.role == 'HOD':
+        context.update({
+            'department': user.department,
+            'department_employees': Employee.objects.filter(department=user.department).count(),
+            'department_projects': Project.objects.filter(department=user.department).order_by('-start_date')[:5],
+            'pending_tasks': Task.objects.filter(assigned_to__department=user.department, status='PENDING').count(),
+        })
+    else:
+        context.update({
+            'my_tasks': Task.objects.filter(assigned_to=user).order_by('due_date')[:5],
+            'my_projects': Project.objects.filter(team_members=user).order_by('-start_date')[:3],
+        })
 
     return render(request, 'dashboards/dashboard.html', context)
 
+@login_required
+def chat_view(request):
+    chats = ChatMessage.objects.filter(Q(sender=request.user) | Q(recipient=request.user)).order_by('-timestamp')
+    return render(request, 'core/chat.html', {'chats': chats})
 
-# @login_required
-# def dashboard(request):
-#     user = request.user
-#     if user.role == 'DG':
-#         return render(request, 'dashboards/dg_dashboard.html')
-#     elif user.role in ['DIR', 'ZD']:
-#         return render(request, 'dashboards/director_dashboard.html')
-#     elif user.role == 'HOD':
-#         return render(request, 'dashboards/hod_dashboard.html')
-#     else:
-#         return render(request, 'dashboards/staff_dashboard.html')
+@login_required
+def inbox_view(request):
+    messages = InboxMessage.objects.filter(recipient=request.user).order_by('-timestamp')
+    return render(request, 'core/inbox.html', {'messages': messages})
+
 
 @login_required
 # @user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD'])
@@ -107,9 +126,13 @@ def employee_create(request):
 # @user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD'])
 def employee_update(request, employee_id):
     employee = get_object_or_404(Employee, employee_id=employee_id)
+    
+    # Check if EmployeeDetail exists, if not create one
+    employee_detail, created = EmployeeDetail.objects.get_or_create(employee=employee)
+    
     if request.method == 'POST':
         form = EmployeeChangeForm(request.POST, instance=employee)
-        detail_form = EmployeeDetailForm(request.POST, instance=employee.details)
+        detail_form = EmployeeDetailForm(request.POST, instance=employee_detail)
         if form.is_valid() and detail_form.is_valid():
             with transaction.atomic():
                 form.save()
@@ -118,8 +141,13 @@ def employee_update(request, employee_id):
             return redirect('employee_detail', employee_id=employee.employee_id)
     else:
         form = EmployeeChangeForm(instance=employee)
-        detail_form = EmployeeDetailForm(instance=employee.details)
-    return render(request, 'employees/employee_form.html', {'form': form, 'detail_form': detail_form, 'employee': employee})
+        detail_form = EmployeeDetailForm(instance=employee_detail)
+    
+    return render(request, 'employees/employee_form.html', {
+        'form': form,
+        'detail_form': detail_form,
+        'employee': employee
+    })
 
 
 @login_required
@@ -150,5 +178,196 @@ def profile(request):
     return render(request, 'employees/profile.html', {'employee': employee, 'detail_form': detail_form})
 
 
-# Role Management Views
+# Workflow Management Views
+
+def is_authorized(user):
+    return Employee.role in ['DG', 'DIR', 'ZD', 'HOD', 'HOU', 'IT_ADMIN']
+
+@login_required
+@user_passes_test(is_authorized)
+def workflow_step_list(request):
+    steps = WorkflowStep.objects.all()
+    return render(request, 'workflow/step_list.html', {'steps': steps})
+
+@login_required
+@user_passes_test(is_authorized)
+def workflow_step_create(request):
+    if request.method == 'POST':
+        form = WorkflowStepForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Workflow step created successfully.')
+            return redirect('workflow_step_list')
+    else:
+        form = WorkflowStepForm()
+    return render(request, 'workflow/step_form.html', {'form': form})
+
+@login_required
+@user_passes_test(is_authorized)
+def workflow_list(request):
+    workflows = Workflow.objects.all()
+    return render(request, 'workflow/list.html', {'workflows': workflows})
+
+@login_required
+@user_passes_test(is_authorized)
+def workflow_create(request):
+    if request.method == 'POST':
+        form = WorkflowForm(request.POST)
+        if form.is_valid():
+            workflow = form.save()
+            messages.success(request, 'Workflow created successfully.')
+            return redirect('workflow_detail', pk=workflow.pk)
+    else:
+        form = WorkflowForm()
+    return render(request, 'workflow/form.html', {'form': form})
+
+@login_required
+@user_passes_test(is_authorized)
+def workflow_detail(request, pk):
+    workflow = get_object_or_404(Workflow, pk=pk)
+    return render(request, 'workflow/detail.html', {'workflow': workflow})
+
+@login_required
+@user_passes_test(is_authorized)
+def workflow_instance_create(request):
+    if request.method == 'POST':
+        form = WorkflowInstanceForm(request.POST)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.current_step = instance.workflow.steps.first()
+            instance.save()
+            messages.success(request, 'Workflow instance created successfully.')
+            return redirect('workflow_instance_detail', pk=instance.pk)
+    else:
+        form = WorkflowInstanceForm()
+    return render(request, 'workflow/instance_form.html', {'form': form})
+
+@login_required
+@user_passes_test(is_authorized)
+def workflow_instance_detail(request, pk):
+    instance = get_object_or_404(WorkflowInstance, pk=pk)
+    return render(request, 'workflow/instance_detail.html', {'instance': instance})
+
+@login_required
+@user_passes_test(lambda u: u.is_authorised())
+def csv_upload(request):
+    if request.method == 'POST':
+        form = CSVUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES['file']
+            file_type = form.cleaned_data['file_type']
+            
+            # Detect file encoding
+            raw_data = file.read()
+            result = chardet.detect(raw_data)
+            file_encoding = result['encoding']
+            
+            # Decode the file content
+            file_content = raw_data.decode(file_encoding)
+            csv_data = csv.DictReader(file_content.splitlines())
+            
+            try:
+                if file_type == 'employee':
+                    for row in csv_data:
+                        Employee.objects.create(
+                            username=row['username'],
+                            email=row['email'],
+                            first_name=row['first_name'],
+                            last_name=row['last_name'],
+                            role=row['role']
+                        )
+                elif file_type == 'project':
+                    for row in csv_data:
+                        Project.objects.create(
+                            name=row['name'],
+                            description=row['description'],
+                            start_date=row['start_date'],
+                            end_date=row['end_date'],
+                            status=row['status']
+                        )
+                elif file_type == 'task':
+                    for row in csv_data:
+                        Task.objects.create(
+                            title=row['title'],
+                            description=row['description'],
+                            project_id=row['project_id'],
+                            assigned_to_id=row['assigned_to_id'],
+                            due_date=row['due_date'],
+                            status=row['status']
+                        )
+                messages.success(request, 'CSV file uploaded and processed successfully.')
+            except Exception as e:
+                messages.error(request, f'Error processing CSV file: {str(e)}')
+            return redirect('csv_upload')
+    else:
+        form = CSVUploadForm()
+    return render(request, 'it_admin/csv_upload.html', {'form': form})
+
+
+@login_required
+def settings(request):
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('settings')
+    else:
+        form = UserProfileForm(instance=profile)
+    return render(request, 'settings.html', {'form': form})
+
+@login_required
+def chat_list(request):
+    chats = ChatMessage.objects.filter(Q(sender=request.user) | Q(recipient=request.user)).order_by('-timestamp')
+    return render(request, 'core/chat_list.html', {'chats': chats})
+
+@login_required
+def chat_detail(request, user_id):
+    other_user = User.objects.get(id=user_id)
+    messages = ChatMessage.objects.filter(
+        (Q(sender=request.user) & Q(recipient=other_user)) |
+        (Q(sender=other_user) & Q(recipient=request.user))
+    ).order_by('timestamp')
+    
+    if request.method == 'POST':
+        form = ChatMessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.sender = request.user
+            message.recipient = other_user
+            message.save()
+            return redirect('chat_detail', user_id=user_id)
+    else:
+        form = ChatMessageForm()
+    
+    return render(request, 'core/chat_detail.html', {
+        'messages': messages,
+        'other_user': other_user,
+        'form': form
+    })
+
+@login_required
+def inbox_list(request):
+    inbox_messages = InboxMessage.objects.filter(recipient=request.user).order_by('-timestamp')
+    return render(request, 'core/inbox_list.html', {'inbox_messages': inbox_messages})
+
+@login_required
+def inbox_detail(request, message_id):
+    message = InboxMessage.objects.get(id=message_id, recipient=request.user)
+    message.is_read = True
+    message.save()
+    return render(request, 'core/inbox_detail.html', {'message': message})
+
+@login_required
+def compose_message(request):
+    if request.method == 'POST':
+        form = InboxMessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.sender = request.user
+            message.save()
+            return redirect('inbox_list')
+    else:
+        form = InboxMessageForm()
+    return render(request, 'core    /compose_message.html', {'form': form})
 

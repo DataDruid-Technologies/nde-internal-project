@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'crispy_tailwind',
     'django_browser_reload',
     'heroicons',
+    'django_ckeditor_5',
     
 ]
 
