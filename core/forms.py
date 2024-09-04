@@ -5,17 +5,19 @@ from crispy_forms.layout import Layout, Submit, Row, Column
 from .models import *
 from django_ckeditor_5.widgets import CKEditor5Widget
 
+
 class RoleForm(forms.ModelForm):
     class Meta:
         model = Role
         fields = '__all__'
 
+
 class DepartmentForm(forms.ModelForm):
     class Meta:
         model = Department
         fields = '__all__'
-        
-    
+
+
 class EmployeeLoginForm(forms.Form):
     employee_id = forms.CharField(max_length=20)
     password = forms.CharField(widget=forms.PasswordInput)
@@ -30,10 +32,12 @@ class EmployeeLoginForm(forms.Form):
             Submit('submit', 'Log in', css_class='btn btn-primary')
         )
 
+
 class EmployeeCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = Employee
-        fields = ('employee_id', 'email', 'first_name', 'last_name', 'date_joined', 'role', 'department')
+        fields = ('employee_id', 'email', 'first_name',
+                  'last_name', 'date_joined', 'role', 'department')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -61,10 +65,12 @@ class EmployeeCreationForm(UserCreationForm):
             Submit('submit', 'Create Employee', css_class='btn btn-primary')
         )
 
+
 class EmployeeChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = Employee
-        fields = ('employee_id', 'email', 'first_name', 'last_name', 'role', 'department', 'is_active', 'employment_status')
+        fields = ('employee_id', 'email', 'first_name', 'last_name',
+                  'role', 'department', 'is_active', 'employment_status')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -88,11 +94,13 @@ class EmployeeChangeForm(UserChangeForm):
             ),
             Row(
                 Column('is_active', css_class='form-group col-md-6 mb-0'),
-                Column('employment_status', css_class='form-group col-md-6 mb-0'),
+                Column('employment_status',
+                       css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'
             ),
             Submit('submit', 'Update Employee', css_class='btn btn-primary')
         )
+
 
 class EmployeeDetailForm(forms.ModelForm):
     class Meta:
@@ -120,8 +128,10 @@ class EmployeeDetailForm(forms.ModelForm):
             ),
             'local_government_area',
             Row(
-                Column('employee_grade_level', css_class='form-group col-md-6 mb-0'),
-                Column('date_of_first_appointment', css_class='form-group col-md-6 mb-0'),
+                Column('employee_grade_level',
+                       css_class='form-group col-md-6 mb-0'),
+                Column('date_of_first_appointment',
+                       css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'
             ),
             'date_of_present_appointment',
@@ -132,13 +142,16 @@ class EmployeeDetailForm(forms.ModelForm):
                 css_class='form-row'
             ),
             Row(
-                Column('pension_fund_administrator', css_class='form-group col-md-6 mb-0'),
-                Column('pension_account_number', css_class='form-group col-md-6 mb-0'),
+                Column('pension_fund_administrator',
+                       css_class='form-group col-md-6 mb-0'),
+                Column('pension_account_number',
+                       css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'
             ),
             'last_promotion_date',
             Submit('submit', 'Update Details', css_class='btn btn-primary')
         )
+
 
 class ChatMessageForm(forms.ModelForm):
     class Meta:
@@ -156,6 +169,7 @@ class ChatMessageForm(forms.ModelForm):
             'content',
             Submit('submit', 'Send', css_class='btn btn-primary')
         )
+
 
 class InboxMessageForm(forms.ModelForm):
     class Meta:
@@ -176,6 +190,7 @@ class InboxMessageForm(forms.ModelForm):
             Submit('submit', 'Send', css_class='btn btn-primary')
         )
 
+
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
@@ -191,6 +206,7 @@ class UserProfileForm(forms.ModelForm):
             Submit('submit', 'Update Profile', css_class='btn btn-primary')
         )
 
+
 class RoleAssignmentForm(forms.ModelForm):
     class Meta:
         model = Employee
@@ -200,22 +216,27 @@ class RoleAssignmentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['role'].queryset = Role.objects.all()
         self.fields['department'].queryset = Department.objects.all()
-        
+
 # Workflow Steps
+
+
 class WorkflowStepForm(forms.ModelForm):
     class Meta:
         model = WorkflowStep
         fields = ['name', 'description', 'order', 'required_role']
+
 
 class WorkflowForm(forms.ModelForm):
     class Meta:
         model = Workflow
         fields = ['name', 'description']
 
+
 class WorkflowInstanceForm(forms.ModelForm):
     class Meta:
         model = WorkflowInstance
         fields = ['workflow', 'initiator']
+
 
 class CSVUploadForm(forms.Form):
     file = forms.FileField()
@@ -224,5 +245,29 @@ class CSVUploadForm(forms.Form):
         ('project', 'Project Data'),
         ('task', 'Task Data'),
     ])
-    
-        
+
+
+class EmployeeForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = ['first_name', 'last_name', 'email', 'employee_id', 'department',
+                  'current_rank', 'date_of_birth', 'date_joined']
+        widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+            'date_joined': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+
+class EmployeeDetailForm(forms.ModelForm):
+    class Meta:
+        model = EmployeeDetail
+        fields = ['bank_name','account_number',]
+
+
+class RoleAssignmentForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = ['role']
+        widgets = {
+            'role': forms.Select(choices=Employee.ROLE_CHOICES)
+        }

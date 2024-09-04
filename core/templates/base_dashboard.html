@@ -97,7 +97,7 @@
                     </a>
                 </li>
                 <li>
-                    <a class="flex items-center gap-2.5 text-gray-500 hover:text-primary duration-300 text-sm font-semibold" href="/chat">
+                    <a class="flex items-center gap-2.5 text-gray-500 hover:text-primary duration-300 text-sm font-semibold" href="{% url 'chat_list' %}">
                         {% heroicon_solid 'chat-bubble-left-right' class="h-6 w-6" %}
                         <span class="lg:block hidden">Chat</span>
                     </a>
@@ -109,6 +109,8 @@
                     </a>
                 </li>
             </ul>
+
+
         </div>
         <div class="flex items-center gap-5">
             <button @click="toggleFullScreen()" class="text-gray-500 hover:text-primary">
@@ -217,6 +219,14 @@
                         </a>
                     </li>
                     {% endif %}
+                    {% if user.role == 'DG' or user.role == 'IT_ADMIN' %}
+                    <a href="{% url 'data_upload' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.resolver_match.url_name == 'data_upload' %}text-blue-700 bg-blue-100 dark:text-blue-100 dark:bg-blue-900{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white{% endif %}">
+                        {% heroicon_outline "document" class="mr-3 flex-shrink-0 h-6 w-6" %}
+                        Data Upload
+                    </a>
+                    {% endif %}
+   
+            </nav>
                 </ul>
             </nav>
         </aside>

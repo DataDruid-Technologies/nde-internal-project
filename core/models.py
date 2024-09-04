@@ -207,8 +207,26 @@ class Employee(AbstractUser):
                 retired_employee.save()
 
         super().save(*args, **kwargs)
+        
 
 
+
+class Leave(models.Model):
+    emploqyee = models.ForeignKey(
+        Employee, on_delete=models.CASCADE, related_name='leaves', verbose_name="Employee")
+    start_date = models.DateField(verbose_name="Start Date")
+    end_date = models.DateField(verbose_name="End Date")
+    LEAVE_TYPES = [
+        ('CL', 'Casual Leave'),
+        ('STL', 'Study Leave'),
+        ('ML', 'Maternity Leave'),
+        ('PL', 'Paternity Leave'),
+        ('OL', 'Other Leave')
+    ]
+    type = models.CharField(max_length=6,choices=LEAVE_TYPES, default='CL', verbose_name="Leave Type")
+    reason = models.TextField(verbose_name="Reason")
+    
+    
 class EmployeeDetail(models.Model):
     employee = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='employee_details')
@@ -556,3 +574,33 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f'{self.user.get_full_name()} Profile'
+
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class Performance(models.Model):
+    RATING_CHOICES = [
+        (1, 'Poor'),
+        (2, 'Below Average'),
+        (3, 'Average'),
+        (4, 'Good'),
+        (5, 'Excellent'),
+    ]
+    employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    evaluation_date = models.DateField()
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    comments = models.TextField()
+
+class Training(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL)
+
+class Retirement(models.Model):
+    employee = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    retirement_date = models.DateField()
+    reason = models.CharField(max_length=200)
+    pension_details = models.TextField()

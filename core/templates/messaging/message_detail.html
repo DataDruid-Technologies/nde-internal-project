@@ -1,0 +1,29 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load tailwind_tags %}
+{% load heroicons %}
+
+{% block title %}Message Detail{% endblock %}
+
+{% block dashboard_content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Message Detail</h1>
+
+    <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+        <div class="p-6">
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">From: {{ message.sender.get_full_name }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Date: {{ message.timestamp|date:"F d, Y H:i" }}</p>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">{{ message.subject }}</h2>
+            <div class="prose dark:prose-invert">
+                {{ message.content|linebreaks }}
+            </div>
+            <div class="mt-6 flex space-x-4">
+                <a href="{% url 'compose_message' %}?reply_to={{ message.id }}" class="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded">Reply</a>
+                <a href="{% url 'delete_message' message.id %}" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

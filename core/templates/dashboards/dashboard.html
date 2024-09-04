@@ -5,14 +5,15 @@
 {% block title %}Dashboard - {{ user.get_full_name }}{% endblock %}
 
 {% block dashboard_content %}
+
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h1 class="text-3xl font-semibold text-gray-900 dark:text-white mb-6">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
         Welcome, {{ user.get_full_name }}
     </h1>
 
     <!-- Role-specific greeting -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-2xl font-bold text-primary dark:text-primary mb-2">
             {% if user.role == 'DG' %}
                 Director General Dashboard
             {% elif user.role == 'DIR' %}
@@ -47,20 +48,20 @@
     </div>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition duration-300 ease-in-out hover:shadow-lg">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Total Employees</h3>
-            <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ total_employees }}</p>
+            <p class="text-3xl font-bold text-primary dark:text-primary">{{ total_employees }}</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition duration-300 ease-in-out hover:shadow-lg">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Departments</h3>
-            <p class="text-3xl font-bold text-green-600 dark:text-green-400">{{ total_departments }}</p>
+            <p class="text-3xl font-bold text-secondary dark:text-secondary">{{ total_departments }}</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition duration-300 ease-in-out hover:shadow-lg">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Active Projects</h3>
-            <p class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ active_projects }}</p>
+            <p class="text-3xl font-bold text-green-600 dark:text-green-400">{{ active_projects }}</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition duration-300 ease-in-out hover:shadow-lg">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Pending Tasks</h3>
             <p class="text-3xl font-bold text-red-600 dark:text-red-400">{{ pending_tasks }}</p>
         </div>
@@ -70,18 +71,18 @@
     {% if user.role == 'DG' %}
         <!-- Director General specific content -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Department Overview</h3>
                 <ul class="space-y-2">
                     {% for dept in department_stats %}
                         <li class="flex justify-between items-center">
                             <span class="text-gray-600 dark:text-gray-300">{{ dept.name }}</span>
-                            <span class="font-semibold text-gray-900 dark:text-white">{{ dept.employee_count }} employees</span>
+                            <span class="font-semibold text-primary dark:text-primary">{{ dept.employee_count }} employees</span>
                         </li>
                     {% endfor %}
                 </ul>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Hires</h3>
                 <ul class="space-y-2">
                     {% for employee in recent_hires %}
@@ -96,18 +97,18 @@
     {% elif user.role == 'DIR' or user.role == 'ZD' %}
         <!-- Director and Zonal Director specific content -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Managed Departments</h3>
                 <ul class="space-y-2">
                     {% for dept in managed_departments %}
                         <li class="flex justify-between items-center">
                             <span class="text-gray-600 dark:text-gray-300">{{ dept.name }}</span>
-                            <span class="font-semibold text-gray-900 dark:text-white">{{ dept.employees.count }} employees</span>
+                            <span class="font-semibold text-primary dark:text-primary">{{ dept.employees.count }} employees</span>
                         </li>
                     {% endfor %}
                 </ul>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Department Projects</h3>
                 <ul class="space-y-2">
                     {% for project in department_projects %}
@@ -122,12 +123,12 @@
     {% elif user.role == 'HOD' or user.role == 'HOU' %}
         <!-- HOD and HOU specific content -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Department: {{ department.name }}</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-2">Total Employees: {{ department_employees }}</p>
-                <p class="text-gray-600 dark:text-gray-300">Pending Tasks: {{ pending_tasks }}</p>
+                <p class="text-gray-600 dark:text-gray-300 mb-2">Total Employees: <span class="font-semibold text-primary dark:text-primary">{{ department_employees }}</span></p>
+                <p class="text-gray-600 dark:text-gray-300">Pending Tasks: <span class="font-semibold text-red-600 dark:text-red-400">{{ pending_tasks }}</span></p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Department Projects</h3>
                 <ul class="space-y-2">
                     {% for project in department_projects %}
@@ -142,7 +143,7 @@
     {% else %}
         <!-- Regular staff and IT Admin specific content -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">My Tasks</h3>
                 <ul class="space-y-2">
                     {% for task in my_tasks %}
@@ -153,7 +154,7 @@
                     {% endfor %}
                 </ul>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">My Projects</h3>
                 <ul class="space-y-2">
                     {% for project in my_projects %}
@@ -168,12 +169,12 @@
     {% endif %}
 
     <!-- Common section for all roles -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Announcements</h3>
         <ul class="space-y-4">
             {% for announcement in recent_announcements %}
-                <li>
-                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white">{{ announcement.title }}</h4>
+                <li class="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0 last:pb-0">
+                    <h4 class="text-lg font-semibold text-primary dark:text-primary">{{ announcement.title }}</h4>
                     <p class="text-gray-600 dark:text-gray-300">{{ announcement.content|truncatewords:30 }}</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Posted on: {{ announcement.created_at|date:"M d, Y" }}</p>
                 </li>

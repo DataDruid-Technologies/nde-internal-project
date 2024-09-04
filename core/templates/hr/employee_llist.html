@@ -30,12 +30,12 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {% for employee in page_obj %}
+                        {% for employee in employees %}
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-200">{{ employee.employee_id }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-200">{{ employee.get_full_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-200">{{ employee.department.name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-200">
+                            <td class="px-6 py-4 whitespace-nowrap">{{ employee.employee_id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ employee.get_full_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ employee.department.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 <a href="{% url 'employee_detail' employee.id %}" class="text-primary hover:text-primary-dark mr-2">View</a>
                                 <a href="{% url 'employee_update' employee.id %}" class="text-secondary hover:text-secondary-dark">Edit</a>
                             </td>
@@ -47,7 +47,6 @@
         </div>
     </div>
     
-
-    {% include 'pagination.html' with page=page_obj %}
+    {% include 'pagination.html' %}
 </div>
 {% endblock %}

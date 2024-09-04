@@ -13,7 +13,7 @@ class DepartmentResource(resources.ModelResource):
     class Meta:
         model = Department
         import_id_fields = ('code',)
-        fields = ('id', 'code', 'name', 'parent')
+        fields = ('id', 'code', 'name', 'type','parent')
         export_order = fields
 
     parent = fields.Field(
@@ -83,9 +83,18 @@ class EmployeeResource(resources.ModelResource):
 @admin.register(Department)
 class DepartmentAdmin(ImportExportModelAdmin):
     resource_class = DepartmentResource
+    list_display = ('code', 'name', 'type', 'parent')
+    list_filter = ('type', 'parent')
+    search_fields = ('code', 'name')
+
 
 @admin.register(Employee)
 class EmployeeAdmin(ImportExportModelAdmin):
     resource_class = EmployeeResource
+    list_display = ('employee_id', 'first_name', 'last_name', 'email', 'department', 'role', 'date_joined', 'is_active')
+    list_filter = ('department', 'role', 'date_joined', 'is_active', 'gender', 'access_type')
+    search_fields = ('employee_id', 'first_name', 'last_name', 'email', 'ippis_number')
+
+
     
 admin.site.register(EmployeeChangeLog)

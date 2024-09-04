@@ -1,6 +1,4 @@
 id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_birth,date_joined,ippis_number,gender,access_type,is_active,is_staff,is_superuser,passwprd
-1,7233,,Agara,Ali,Silas,DG,DG,1972-04-04,2024-07-12,496500, M,Active,TRUE,TRUE,TRUE,@staff_7233
-916,5948,nnejalala@yahoo.com,Ogochukwu,Nneoma,Odo,IPR,IT_ADMIN,1988-01-11,2011-10-15,205748, F,Active,TRUE,TRUE,TRUE,@staff_5948
 2,2109,aliuabubakr@gmail.com,Aliyu,,Abubakar,PROC,DIR,1965-01-05,1990-02-01,191854, M,Active,TRUE,FALSE,FALSE,@staff_2109
 3,1995,folarinmartins1263@gmail.com,Martins,Kayode,Folarin,INSP,DIR,1966-01-12,1990-01-19,169872, M,Active,TRUE,FALSE,FALSE,@staff_1995
 4,2216,ndirpayamaryb@yahoo.com,Mary,Battah,Ndirpaya,F&A,DIR,1967-06-29,1990-01-11,169649, F,Active,TRUE,FALSE,FALSE,@staff_2216
@@ -36,7 +34,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 34,4103,obibush@yahoo.com,Anionwo Obinna,Lazarus ,Offia,VSD,STAFF,1969-12-21,1993-12-14,170102, M,Active,TRUE,FALSE,FALSE,@staff_4103
 35,4200,ponigede@gmail.com,Philomena,Enetsomhi,Dipo-Ojo,,STAFF,1968-05-14,1994-04-12,171652, F,Active,TRUE,FALSE,FALSE,@staff_4200
 36,4318,israeladekitan2016@gmail.com,Oluranti,Israel,Adekitan,,STAFF,1965-08-05,1994-10-05,171517, M,Active,TRUE,FALSE,FALSE,@staff_4318
-37,4319,cceleleme@gmail.com,Obiaderi,Beatrice,Oruoyehu,REP,STAFF,1965-12-11,1994-10-05,170092, F,Active,TRUE,FALSE,FALSE,@staff_4319
+37,4319,,Obiaderi,Beatrice,Oruoyehu,REP,STAFF,1965-12-11,1994-10-05,170092, F,Active,TRUE,FALSE,FALSE,@staff_4319
 38,4322,folarindupeola@gmail.com,Josephine,Dupeola,Folarin,HR,STAFF,1969-01-03,1994-10-05,169641, F,Active,TRUE,FALSE,FALSE,@staff_4322
 39,4333,tandiclem@live.com,Clementina,Obiageli,O’Dwyer,HR,STAFF,1968-03-03,1994-10-15,171951, F,Active,TRUE,FALSE,FALSE,@staff_4333
 40,4335,ilyailelah@gmail.com ,Iliya,Yakubu,Ilelah,SPW,STAFF,1966-03-10,1991-10-20,170169, M,Active,TRUE,FALSE,FALSE,@staff_4335
@@ -56,7 +54,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 54,6524,ibnalinter@yahoo.com,Mohammed,Ladan,Ibrahim,VSD,STAFF,1968-11-17,2018-09-03,435340, M,Active,TRUE,FALSE,FALSE,@staff_6524
 55,4431,yarimasaaduiya@gmail.com,Yerima,Iya,Sa'adu ,,STAFF,1970-12-16,1993-11-26,192318, M,Active,TRUE,FALSE,FALSE,@staff_4431
 56,4698,godwin_ojobo@yahoo.com,Theodora,Adaku,Ojobo,,STAFF,1971-06-15,1999-01-25,192038, F,Active,TRUE,FALSE,FALSE,@staff_4698
-57,1991,carolazubuike08@gmail.com,Azogini,Caroline,Azubuike,SSE,STAFF,1966-07-02,1990-01-19,169593, F,Active,TRUE,FALSE,FALSE,@staff_1991
+57,1991,,Azogini,Caroline,Azubuike,SSE,STAFF,1966-07-02,1990-01-19,169593, F,Active,TRUE,FALSE,FALSE,@staff_1991
 58,3126,rchioma224@yahoo.com,Dorothy,Chioma,Evbagharu,,STAFF,1968-05-15,1992-02-10,171371, F,Active,TRUE,FALSE,FALSE,@staff_3126
 59,3966,ochimanailebaye8@gmail.com,Christiana,Ilebaye,Ochimara,,STAFF,1969-08-21,1993-08-09,171353, F,Active,TRUE,FALSE,FALSE,@staff_3966
 60,5539,isacaleb65@gmail.com,Caleb,Yerima,Isa ,,STAFF,1975-09-21,2011-01-21,192199, M,Active,TRUE,FALSE,FALSE,@staff_5539
@@ -206,7 +204,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 204,6166,peterwordumanti@gmail.com,Peter,Ngozi,Wordumanti,,STAFF,1977-11-23,2012-12-05,171093, M,Active,TRUE,FALSE,FALSE,@staff_6166
 205,2466,catherinechima@yahoo.com,Catherine,Chinenye,Chima-Uzoaru,WEB,STAFF,1968-03-03,1990-06-06,170143, F,Active,TRUE,FALSE,FALSE,@staff_2466
 206,3631,oyrniranmary561@gmail.com,Mary,Adeola,Oyeniran,,STAFF,1971-06-19,1992-12-01,171656, F,Active,TRUE,FALSE,FALSE,@staff_3631
-207,5090,bukolaibitoyee33@gmail.com,Bosede,Bukola,Ilesanmi,,STAFF,1974-05-12,2003-11-27,172284, F,Active,TRUE,FALSE,FALSE,@staff_5090
+207,5090,,Bosede,Bukola,Ilesanmi,,STAFF,1974-05-12,2003-11-27,172284, F,Active,TRUE,FALSE,FALSE,@staff_5090
 208,6062,bellonuhu999@gmail.com,Nuhu,,Bello,,STAFF,1974-01-15,2012-10-03,191859, M,Active,TRUE,FALSE,FALSE,@staff_6062
 209,6071,kennethkierama@gmail.com,Kopu,Kenneth,Kierama,,STAFF,1975-05-05,2012-10-04,170955, M,Active,TRUE,FALSE,FALSE,@staff_6071
 210,6104,augustineiliya6104@gmail.com,Augustine,Agum,Iliya,,STAFF,1968-05-02,2012-10-04,193379, M,Active,TRUE,FALSE,FALSE,@staff_6104
@@ -320,7 +318,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 318,4290,idachuadamualiyu@gamil.com,Adamu,Idachu,Aliyu,INSP,STAFF,1969-07-15,1994-07-27,170119, M,Active,TRUE,FALSE,FALSE,@staff_4290
 319,4384,pwaagulmajosiah@gmail.com,Josiah,,Pwagulma,,STAFF,1967-08-22,1991-05-02,191714, F,Active,TRUE,FALSE,FALSE,@staff_4384
 320,4403,dalibiym@gmail.com,Yusuf,Moh’d Dalibi,Baba,F&A,STAFF,1971-11-08,1995-01-13,193593, M,Active,TRUE,FALSE,FALSE,@staff_4403
-321,4469,shuaibuhassan45@gmail.com,Micheal,Ibrahim,Nyai,,STAFF,1967-06-16,1992-12-07,170927, M,Active,TRUE,FALSE,FALSE,@staff_4469
+321,4469,,Micheal,Ibrahim,Nyai,,STAFF,1967-06-16,1992-12-07,170927, M,Active,TRUE,FALSE,FALSE,@staff_4469
 322,4620,Jummaiabdullahi18@yahoo.com,Aminat,Jummai,Abdullahi,,STAFF,1976-06-24,1996-08-01,192201, F,Active,TRUE,FALSE,FALSE,@staff_4620
 323,4622,auwalsulieman469@gmail.com,Auwalu,,Suleiman,F&A,STAFF,1972-04-10,1995-09-01,192486, M,Active,TRUE,FALSE,FALSE,@staff_4622
 324,4662,sagirjaafar@gmail.com,Sagir,,Ja'afar,,STAFF,1970-01-06,1991-06-12,192126, M,Active,TRUE,FALSE,FALSE,@staff_4662
@@ -543,7 +541,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 541,5479,umorujuliet@gmail.com,Juliet,Imoghomhe,Umoru,,STAFF,1985-07-30,2011-02-14,171057, F,Active,TRUE,FALSE,FALSE,@staff_5479
 542,5481,odiorosi@gmail.com,Perpetual,Odior,Igbebo,,STAFF,1983-05-21,2011-02-14,170902, M,Active,TRUE,FALSE,FALSE,@staff_5481
 543,5482,chinenye@gmail.com,Chinenye,Josephine,Ejimkonye,,STAFF,1982-06-30,2011-01-25,193387, F,Active,TRUE,FALSE,FALSE,@staff_5482
-544,5484,cceleleme@gmail.com,Chimaobi,,Eleleme,REP,STAFF,1982-08-13,2011-01-25,170957, M,Active,TRUE,FALSE,FALSE,@staff_5484
+544,5484,,Chimaobi,,Eleleme,REP,STAFF,1982-08-13,2011-01-25,170957, M,Active,TRUE,FALSE,FALSE,@staff_5484
 545,5491,eguzosampsonchima2013@yahoo.com,Sampson,Chima,Eguzo,,STAFF,1978-05-16,2011-01-24,192247, M,Active,TRUE,FALSE,FALSE,@staff_5491
 546,5506,jacobalos2000@yahoo.co.uk,Jacob,,Egbaloghemen,,STAFF,1982-11-27,2011-01-21,170970, M,Active,TRUE,FALSE,FALSE,@staff_5506
 547,5509,Gilpett@yahoo.ocm,Omenihu ,Giles,Nwogu,PR&S,STAFF,1976-12-11,2011-01-21,192115, M,Active,TRUE,FALSE,FALSE,@staff_5509
@@ -672,7 +670,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 670,6293,ugwuokeic@gmail.com,Christian,Ikechukwu,Ugwuoke,,STAFF,1976-11-19,2015-10-16,357482, F,Active,TRUE,FALSE,FALSE,@staff_6293
 671,6308,chrixomoh@yahoo.com,Oshoriame,Christopher,Momoh,,STAFF,1980-03-27,2015-10-16,357563, M,Active,TRUE,FALSE,FALSE,@staff_6308
 672,6314,vigwenwanne@yahoo.com,Vincent,Ifeanyi,Igwenwanne,,STAFF,1972-07-08,2015-10-16,357558, M,Active,TRUE,FALSE,FALSE,@staff_6314
-673,6325,vibraven@gmail.com,Darlington,Kingsley,Chukwuma,,STAFF,1975-01-01,2015-11-13,368928, M,Active,TRUE,FALSE,FALSE,@staff_6325
+673,6325,,Darlington,Kingsley,Chukwuma,,STAFF,1975-01-01,2015-11-13,368928, M,Active,TRUE,FALSE,FALSE,@staff_6325
 674,6543,aminuengineer2003@gmail.com,Aminu,,Abubakar,,STAFF,1974-11-04,2018-09-03,428055, M,Active,TRUE,FALSE,FALSE,@staff_6543
 675,6546,echeremy@yahoo.com,Remigius,Echezona,Okpala,,STAFF,1984-04-06,2018-09-03,428058, M,Active,TRUE,FALSE,FALSE,@staff_6546
 676,6579,aminaibrahim339@gmail.com,Amina,,Ibrahim,,STAFF,1984-07-09,2018-09-03,427757, F,Active,TRUE,FALSE,FALSE,@staff_6579
@@ -721,7 +719,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 719,4320,oludainimuyiwa@gmail.com,Muyiwa,,Oludaini,,STAFF,1971-11-02,1994-11-10,172034, M,Active,TRUE,FALSE,FALSE,@staff_4320
 720,4767,asuelimejuliana@gmail.com,Ekata,Juliana,Asuelime,,STAFF,1974-07-22,1997-11-07,170775, F,Active,TRUE,FALSE,FALSE,@staff_4767
 721,5151,gbengabells@gmail.com,Gbenga,Steven,Bello,,STAFF,1973-05-06,2004-09-20,170520, M,Active,TRUE,FALSE,FALSE,@staff_5151
-722,5270,magajibelloibrahim82@gmail.com ,Abubakar,Usman,Idris,,STAFF,1983-02-02,2009-08-23,192885, M,Active,TRUE,FALSE,FALSE,@staff_5270
+722,5270,,Abubakar,Usman,Idris,,STAFF,1983-02-02,2009-08-23,192885, M,Active,TRUE,FALSE,FALSE,@staff_5270
 723,5331,trbradeen23@gmail.com,Tabra,Adamu,Shamsudeen,F&A,STAFF,1979-09-18,2011-11-03,170020, M,Active,TRUE,FALSE,FALSE,@staff_5331
 724,5337,mycharanchi@gmail.com,Yusuf,Mamman,Charanchi,,STAFF,1980-07-14,2011-02-14,192249, M,Active,TRUE,FALSE,FALSE,@staff_5337
 725,5340,achiposyne@gmail.com,Suleiman,,Abubakar,,STAFF,1979-09-25,2011-03-15,192953, M,Active,TRUE,FALSE,FALSE,@staff_5340
@@ -766,7 +764,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 764,5882,ibrobarda@yahoo.com ,Ibrahim,Abubakar,Barda,NW-Z,STAFF,1981-07-17,2011-10-10,192880, M,Active,TRUE,FALSE,FALSE,@staff_5882
 765,5893,aligundagee@yahoo.com,Ali,Gunda,Abdullahi,,STAFF,1978-08-23,2011-11-03,193219, M,Active,TRUE,FALSE,FALSE,@staff_5893
 766,5916,ohajunwaalice@gmail.com,Alice,Ikechi,Ohajunwa,,STAFF,1971-08-20,2011-10-21,170133, F,Active,TRUE,FALSE,FALSE,@staff_5916
-767,5917,abdulganiyualeru@gmial.com,Isaac,Adegboye,Oluwole,,STAFF,1980-07-17,2011-10-21,171544, M,Active,TRUE,FALSE,FALSE,@staff_5917
+767,5917,,Isaac,Adegboye,Oluwole,,STAFF,1980-07-17,2011-10-21,171544, M,Active,TRUE,FALSE,FALSE,@staff_5917
 768,5922,toyinibrahim25@gmail.com,Saheed,Toyin,Ibrahim,,STAFF,1981-01-03,2011-12-28,171676, M,Active,TRUE,FALSE,FALSE,@staff_5922
 769,5939,zotaokafor@gmail.com,Zotaobi,Kenneth,Okafor,SPW,STAFF,1982-09-09,2011-10-15,169970, M,On Leave,TRUE,FALSE,FALSE,@staff_5939
 770,5950,collinslo@yahoo.com,Collins,Lotanna,Obi,,STAFF,1979-10-11,2011-10-12,192241, M,Active,TRUE,FALSE,FALSE,@staff_5950
@@ -800,14 +798,14 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 798,5499,uzungozi09@gmail.com ,Ngozi,Henrietta,Uzu,SE-Z,STAFF,1983-03-29,2011-12-16,192540, F,Active,TRUE,FALSE,FALSE,@staff_5499
 799,5508,,Hajara,Chibundo,Uthman,RC,STAFF,1979-07-27,2011-01-20,169682, F,Active,TRUE,FALSE,FALSE,@staff_5508
 800,5531,tukisamuel@yahoo.com,Ekenechukwu,,Ezike,,STAFF,1978-01-22,2011-01-24,170752, F,Active,TRUE,FALSE,FALSE,@staff_5531
-801,5550,vibraven@gmail.com,Chukwuemeka,Nnnemeka,Madu,,STAFF,1984-01-01,2011-01-24,170698, M,Active,TRUE,FALSE,FALSE,@staff_5550
+801,5550,,Chukwuemeka,Nnnemeka,Madu,,STAFF,1984-01-01,2011-01-24,170698, M,Active,TRUE,FALSE,FALSE,@staff_5550
 802,5588,ndubuisinworu@gmail.com,Ndubisi,,Nworu,,STAFF,1981-01-01,2011-05-12,191607, M,Active,TRUE,FALSE,FALSE,@staff_5588
 803,5592,symi29@yahoo.com,Hassana,,Musa ,,STAFF,1983-04-29,2011-03-29,170769, M,Active,TRUE,FALSE,FALSE,@staff_5592
 804,5594,hannatumbel@gmail.com,Maude,Bello,Hannatu ,,STAFF,1978-06-22,2011-03-29,192055, M,Active,TRUE,FALSE,FALSE,@staff_5594
 805,5612,ihu4shot@gmail.com,Ihuoma,Oluchi,Nwachukwu,F&A,STAFF,1982-12-11,2011-03-23,170109, F,Active,TRUE,FALSE,FALSE,@staff_5612
 806,5621,abazeez28@gmail.com,Abiola,Muttiu,Azeez,,STAFF,1986-03-03,2012-08-20,172040, M,Active,TRUE,FALSE,FALSE,@staff_5621
 807,5623,prudent_Sunday@yahoo.com,Bassey,Asukwo,Emetuei,,STAFF,1972-03-06,2011-12-16,170708, M,Active,TRUE,FALSE,FALSE,@staff_5623
-808,5629,nill,Rabiat,Jibril,Giza,,STAFF,1970-04-27,2011-10-10,170883, F,Active,TRUE,FALSE,FALSE,@staff_5629
+808,5629,,Rabiat,Jibril,Giza,,STAFF,1970-04-27,2011-10-10,170883, F,Active,TRUE,FALSE,FALSE,@staff_5629
 809,5667,movementiano@gmail.com,Bala,Monsur,Ibrahim,,STAFF,1982-05-05,2011-12-09,192252, M,Active,TRUE,FALSE,FALSE,@staff_5667
 810,5699,okolovivianijeoma78@gmail.com,Vivian,Ijeoma,Okolo,,STAFF,1978-02-17,2011-12-16,192372, F,Active,TRUE,FALSE,FALSE,@staff_5699
 811,5710,anasalam8686@gmail.com,Iliyasu ,Anakobe, Salami,,STAFF,1986-05-22,2011-11-29,171390, M,Active,TRUE,FALSE,FALSE,@staff_5710
@@ -1115,13 +1113,13 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1114,6303,nwobu.chizoba@yahoo.com,Francisca,Chizoba,Nwobu,,STAFF,1984-03-12,2015-10-16,357515, F,Active,TRUE,FALSE,FALSE,@staff_6303
 1115,6304,ojobabatope02@gmail.com,Babatope,,Ojo,,STAFF,1983-09-06,2015-09-16,357496, M,Active,TRUE,FALSE,FALSE,@staff_6304
 1116,6307,adebolaola@gmail.com,Kayode,,Ola,,STAFF,1988-06-23,2015-10-16,357501, M,Active,TRUE,FALSE,FALSE,@staff_6307
-1117,6311,bilifagbola@gmail.com,Raphael,Onyemalaechi,Monye,,STAFF,1988-03-14,2015-09-16,357493, M,Active,TRUE,FALSE,FALSE,@staff_6311
+1117,6311,,Raphael,Onyemalaechi,Monye,,STAFF,1988-03-14,2015-09-16,357493, M,Active,TRUE,FALSE,FALSE,@staff_6311
 1118,6315,osesandypretty@yahoo.com,Sandra,Ngozi,Osedo,SS-Z,STAFF,1982-11-15,2015-10-16,360623, F,Active,TRUE,FALSE,FALSE,@staff_6315
 1119,6317,nwakaisaiah2022@gmail.com,Isaiah,Kanayo,Nwaka,SS-Z,STAFF,1984-07-07,2015-10-16,357491, M,Active,TRUE,FALSE,FALSE,@staff_6317
 1120,6319,kailanialhassan@gmail.com,Moh’D,Alhassan,Kailani,,STAFF,1985-10-16,2015-10-16,357583, M,Active,TRUE,FALSE,FALSE,@staff_6319
 1121,6323,surajasimi@yahoo.com,Suraju,Soladoyin,Asimi,,STAFF,1987-08-27,2015-11-13,368929, M,Active,TRUE,FALSE,FALSE,@staff_6323
 1122,6326,dencitydysky@gmail.com,Silas,Nnamdi,Ihemanma,,STAFF,1983-10-26,2015-11-13,368922, M,Active,TRUE,FALSE,FALSE,@staff_6326
-1123,6331,bilifagbola@gmail.com,Joy,Adaku,Okoroji,,STAFF,1987-06-21,2015-11-13,368927, F,Active,TRUE,FALSE,FALSE,@staff_6331
+1123,6331,,Joy,Adaku,Okoroji,,STAFF,1987-06-21,2015-11-13,368927, F,Active,TRUE,FALSE,FALSE,@staff_6331
 1124,6372,ifyokaeme@gmail.com,Jean,Ifechukwude,Adewole,IPR,STAFF,1988-06-10,2016-12-23,231796, M,On Leave,TRUE,FALSE,FALSE,@staff_6372
 1125,6398,georgeothuke@yahoo.com,Omidi,Oghenerie,Othuke,,STAFF,1986-12-26,2016-12-23,388079, M,Active,TRUE,FALSE,FALSE,@staff_6398
 1126,6653,ojimah01@gmail.com,Timothy,Ojima,Ogwu,,STAFF,1988-07-27,2018-09-03,442228, M,Active,TRUE,FALSE,FALSE,@staff_6653
@@ -1204,14 +1202,13 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1203,6260,,Blessing,David,Kwada,,STAFF,1983-11-09,2015-10-16,357566, M,Active,TRUE,FALSE,FALSE,@staff_6260
 1204,6264,rafolak4u2001@gmail.com,Atinuke,Zainab,Kolapo,,STAFF,1985-05-18,2015-10-16,357629, F,Active,TRUE,FALSE,FALSE,@staff_6264
 1205,6346,somtonke@yahoo.com,Maureen,Nkechi,Onyeukwu,,STAFF,1983-02-18,2016-12-23,388150, F,Active,TRUE,FALSE,FALSE,@staff_6346
-1206,6347,christianchinedu67@gmail.com,Goodness,Ifeoma,Okafor,,STAFF,1985-03-12,2016-12-23,388098, F,Active,TRUE,FALSE,FALSE,@staff_6347
+1206,6347,,Goodness,Ifeoma,Okafor,,STAFF,1985-03-12,2016-12-23,388098, F,Active,TRUE,FALSE,FALSE,@staff_6347
 1207,6349,ugochiamechi247@gmail.com,Chukwuezugo,Ugochi,Amechi,SE-Z,STAFF,1988-04-15,2016-12-23,388102, M,Active,TRUE,FALSE,FALSE,@staff_6349
 1208,6351,izu4val@gmail.com ,Valentine,Izuchukwu,Okafor,SE-Z,STAFF,1988-08-02,2016-12-23,388151, M,Active,TRUE,FALSE,FALSE,@staff_6351
 1209,6352,judofnelly@gmail.com ,Jude,Chukwuebuka,Nwaogu,SE-Z,STAFF,1984-04-25,2016-12-23,388103, M,Active,TRUE,FALSE,FALSE,@staff_6352
 1210,6353,inibehejerome1@gmail.com,Bassey,Inibehe,Essien,,STAFF,1981-09-21,2016-12-23,388105, F,Active,TRUE,FALSE,FALSE,@staff_6353
 1211,6354,nnamenkagodwin@yahoo.com,Godwin,Nnaemeka,Ihevueme,SE-Z,STAFF,1987-09-26,2016-12-23,388164, M,Active,TRUE,FALSE,FALSE,@staff_6354
 1212,6358,vonwuasoanya@yahoo.com,Augustina,Amaka,Ozoemena,,STAFF,1971-08-13,2016-12-23,388144, F,Active,TRUE,FALSE,FALSE,@staff_6358
-1213,6359,edykanins048@yahoo.com,Edith,Chinenye,Aninta,,STAFF,1986-12-26,2016-12-23,388156, F,Active,TRUE,FALSE,FALSE,@staff_6359
 1214,6360,paschaledene312@gmail.com,Nwiboko,Paschal,Edene,REP,STAFF,1991-10-11,2016-12-23,388099, M,Active,TRUE,FALSE,FALSE,@staff_6360
 1215,6362,pamjane2611@yahoo.com,Pamela,Afoma,Nwadinobi-Nweke,,STAFF,1990-11-26,2016-12-23,388158, F,Active,TRUE,FALSE,FALSE,@staff_6362
 1216,6363,ifeengige@yahoo.com,Ifechukwu,Vitalis,Ngige,,STAFF,1982-10-06,2016-12-23,388082, M,Active,TRUE,FALSE,FALSE,@staff_6363
@@ -1228,7 +1225,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1227,6382,sadiqgaladima@gmail.com,Galadima,Mohammed,Abubakar,,STAFF,1987-04-02,2016-12-23,387909, M,Active,TRUE,FALSE,FALSE,@staff_6382
 1228,6384,saifullahisaidu909@gmail.com,Saifullahi,,Saidu,,STAFF,1989-10-11,2016-12-23,387830, M,Active,TRUE,FALSE,FALSE,@staff_6384
 1229,6385,abdul2g86@gmail.com,Abdulrazaq,-,Umar,,STAFF,1990-07-23,2016-12-23,387898, M,Active,TRUE,FALSE,FALSE,@staff_6385
-1230,6390,nwabuezechizie@yahoo.com,Helen,Obiageri,Onyewuchi,,STAFF,1970-06-16,2016-12-23,390826, F,Active,TRUE,FALSE,FALSE,@staff_6390
+1230,6390,,Helen,Obiageri,Onyewuchi,,STAFF,1970-06-16,2016-12-23,390826, F,Active,TRUE,FALSE,FALSE,@staff_6390
 1231,6391,queenclinton@gmail.com,Uzoamaka,Tonnex,Chukwu,,STAFF,1984-09-03,2016-12-23,390825, F,Active,TRUE,FALSE,FALSE,@staff_6391
 1232,6392,mosunmolaoke@gmail.com,Oluwaseun,Mosunmola,Oke,,STAFF,1985-08-06,2016-12-23,388116, F,Active,TRUE,FALSE,FALSE,@staff_6392
 1233,6393,adeleyejames54@gmail.com,Olarenwaju,James,Adeleye ,,STAFF,1991-06-20,2016-12-23,388115, M,Active,TRUE,FALSE,FALSE,@staff_6393
@@ -1257,7 +1254,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1256,6431,abdumutalibshuaibu19@gmail.com,Abdulmutalib,Tenimu,Shuaibu,NC-Z,STAFF,1993-04-12,2016-12-23,387847, M,Active,TRUE,FALSE,FALSE,@staff_6431
 1257,6432,akinbanjideji@gmail.com,Deji,,Akinbanji,LOANS,STAFF,1989-07-01,2016-12-23,388071, M,Active,TRUE,FALSE,FALSE,@staff_6432
 1258,6433,kaegorita@gmail.com,Rita,Nwakaego,Okeke,,STAFF,1988-04-10,2016-12-23,388154, F,Active,TRUE,FALSE,FALSE,@staff_6433
-1259,6437,ezukwolilian@gmail.com,Valentine,Tochukwu,Onwuasoanya,,STAFF,1991-02-14,2016-12-23,388159, M,Active,TRUE,FALSE,FALSE,@staff_6437
+1259,6437,,Valentine,Tochukwu,Onwuasoanya,,STAFF,1991-02-14,2016-12-23,388159, M,Active,TRUE,FALSE,FALSE,@staff_6437
 1260,6439,ezomofranca@gmail.com ,Francisca,Ikhamate,Ezomo,,STAFF,1986-07-11,2016-12-23,388091, F,Active,TRUE,FALSE,FALSE,@staff_6439
 1261,6441,macfrank2019@gmail.com,Barakemi,Akaneku,Egberipou,,STAFF,1983-01-01,2016-12-23,388093, F,Active,TRUE,FALSE,FALSE,@staff_6441
 1262,6442,abiodun.abdulkadir@gmail.com,Abdulkadir,Abiodun,Folorunsho,,STAFF,1986-10-14,2016-12-23,387905, M,Active,TRUE,FALSE,FALSE,@staff_6442
@@ -1294,14 +1291,14 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1293,5578,hajara1975@gmail.com,Hajara,,Ibrahim,,STAFF,1971-12-23,2011-03-21,170597, F,Active,TRUE,FALSE,FALSE,@staff_5578
 1294,5603,markassim69@gmai 07067777024,Adamu,Maryam,Kassim,,STAFF,1984-05-17,2011-03-16,171329, F,Active,TRUE,FALSE,FALSE,@staff_5603
 1295,6365,amhafy04@gmail.com,Amina,Musa,Ahmad ,NC-Z,STAFF,1990-12-07,2016-12-23,387836, F,Active,TRUE,FALSE,FALSE,@staff_6365
-1296,6389,NIL,Ibrahim,,Ahmed,,STAFF,1977-04-19,2016-12-23,387897, M,Active,TRUE,FALSE,FALSE,@staff_6389
+1296,6389,,Ibrahim,,Ahmed,,STAFF,1977-04-19,2016-12-23,387897, M,Active,TRUE,FALSE,FALSE,@staff_6389
 1297,6399,isicheigloria09@gmail.com,Gloria,-,Isichei,,STAFF,1991-07-20,2016-12-23,388146, F,Active,TRUE,FALSE,FALSE,@staff_6399
 1298,7112,,Garba,,James,,STAFF,1991-08-19,2023-10-31,562145,M,Active,TRUE,FALSE,FALSE,@staff_7112
 1299,2787,sulesalisu87@gmail.com,Sule,,Salisu,,STAFF,1965-05-25,1991-08-12,169976, M,Active,TRUE,FALSE,FALSE,@staff_2787
 1300,3399,igwenagu@gmail.com,Fidelis,,Igwenagu,,STAFF,1966-11-24,1990-11-11,191957, M,Active,TRUE,FALSE,FALSE,@staff_3399
 1301,2527,osayandejohnbull@yahoo.com,Johnbull,,Osayande,,STAFF,1966-01-11,1990-04-17,171301, M,Active,TRUE,FALSE,FALSE,@staff_2527
 1302,3384,jonahnaamar01@gmail.com,Na'amar,Nuhu,Jonah ,,STAFF,1968-06-30,1990-10-09,191858, F,Active,TRUE,FALSE,FALSE,@staff_3384
-1303,3523,-,Maria,Enyanwu,Peter,,STAFF,1972-04-10,1992-04-09,170552, M,Active,TRUE,FALSE,FALSE,@staff_3523
+1303,3523,,Maria,Enyanwu,Peter,,STAFF,1972-04-10,1992-04-09,170552, M,Active,TRUE,FALSE,FALSE,@staff_3523
 1304,5367,monisolola1882@gmail.com,Monisola,,Lasisi,,STAFF,1985-02-28,2011-01-25,171674, F,Active,TRUE,FALSE,FALSE,@staff_5367
 1305,5534,akwaarit@yahoo.com,Arit,Akwa,Dickson,,STAFF,1974-10-10,2011-01-21,171338, F,Active,TRUE,FALSE,FALSE,@staff_5534
 1306,5832,emmaokebugwu@gmail.com,Onyechikachi,Emmanuel,Okebugwu,,STAFF,1983-06-16,2012-06-28,170785, M,Active,TRUE,FALSE,FALSE,@staff_5832
@@ -1338,7 +1335,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1337,6163,halliruharuna14@gmail.com,Haruna,,Haliru,,STAFF,1979-04-16,2012-09-03,171047, M,Active,TRUE,FALSE,FALSE,@staff_6163
 1338,6200,musagimba1973@gmail.com,Hussaini,Gimba,Musa ,,STAFF,1973-06-15,2012-09-03,192200, F,Active,TRUE,FALSE,FALSE,@staff_6200
 1339,6201,usmanami1974@gmail.com,Usman,Ahmed,Aminu ,,STAFF,1974-02-11,2012-08-22,170866, M,Active,TRUE,FALSE,FALSE,@staff_6201
-1340,6355,nwabuezechizie@yahoo.com,Cynthia,Ebere,Awuzie,,STAFF,1983-01-31,2016-12-23,390827, F,Active,TRUE,FALSE,FALSE,@staff_6355
+1340,6355,,Cynthia,Ebere,Awuzie,,STAFF,1983-01-31,2016-12-23,390827, F,Active,TRUE,FALSE,FALSE,@staff_6355
 1341,6356,,Amuda,Buhari,Yusuf,PR&S,STAFF,1986-05-15,2016-12-23,387948, M,Active,TRUE,FALSE,FALSE,@staff_6356
 1342,6357,fitzeikye@gmail.com,Innocent,Ikechukwu,Udoaku,,STAFF,1989-05-15,2016-12-23,388100, M,Active,TRUE,FALSE,FALSE,@staff_6357
 1343,6369,akabel05@gmail.com,Bello,Kabir,Ahmed ,,STAFF,1984-11-01,2016-12-23,387838, M,Active,TRUE,FALSE,FALSE,@staff_6369
@@ -1424,7 +1421,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1423,6594,,Umar,Sani,Abubakar,,STAFF,1987-09-06,2018-09-03,427797, M,Active,TRUE,FALSE,FALSE,@staff_6594
 1424,6596,okahdonatusc@gmail.com ,Chinedu,Donatus,Okah,,STAFF,1983-08-14,2018-09-03,428083, M,Active,TRUE,FALSE,FALSE,@staff_6596
 1425,6598,najeebmallam@gmail.com,Abubakar,Najib,Aliyu,,STAFF,1984-06-02,2018-09-03,427755, M,Active,TRUE,FALSE,FALSE,@staff_6598
-1426,6600,ebenezerbolade09@gmail.com,Adejoke,Opeyemi,Arohunmolase,,STAFF,1981-10-26,2018-09-03,427789, F,Active,TRUE,FALSE,FALSE,@staff_6600
+1426,6600,,Adejoke,Opeyemi,Arohunmolase,,STAFF,1981-10-26,2018-09-03,427789, F,Active,TRUE,FALSE,FALSE,@staff_6600
 1427,6601,oyekanolajumoke1986@gmail.com,Bosede,Olajumoke,Oyekan ,,STAFF,1986-04-06,2018-09-03,427787, F,Active,TRUE,FALSE,FALSE,@staff_6601
 1428,6602,davidsoneseare0@gmail.com,Davison,,Eseare,,STAFF,1991-11-21,2018-09-03,428081, M,Active,TRUE,FALSE,FALSE,@staff_6602
 1429,6606,mubashirdaura@gmail.com,Mubashir,,Sani,,STAFF,1990-06-10,2018-09-03,427795, M,Active,TRUE,FALSE,FALSE,@staff_6606
@@ -1439,7 +1436,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1438,6624,edwardclement85@gmail.com,Edward,,Clement,,STAFF,1989-11-14,2018-09-03,427821, M,Active,TRUE,FALSE,FALSE,@staff_6624
 1439,6625,chizobaechekam@gmail.com,Vivian,Chizoba,Echekam  ,,STAFF,1982-04-18,2018-09-03,428242, F,Active,TRUE,FALSE,FALSE,@staff_6625
 1440,6627,kareemyemisi86@gmail.com,Yemisi,Bashirat,Kareem,,STAFF,1986-04-02,2018-09-03,437474, F,Active,TRUE,FALSE,FALSE,@staff_6627
-1441,6628,NIL,Ahmed,Musa,Haruna,,STAFF,1977-08-06,2018-09-03,437480, M,Active,TRUE,FALSE,FALSE,@staff_6628
+1441,6628,,Ahmed,Musa,Haruna,,STAFF,1977-08-06,2018-09-03,437480, M,Active,TRUE,FALSE,FALSE,@staff_6628
 1442,6629,zainabahmerd@gmail.com,Zainab,,Ahmed,,STAFF,1992-08-10,2018-09-03,437479, F,Active,TRUE,FALSE,FALSE,@staff_6629
 1443,6630,sadiqusman23@yahoo.com ,Sadiq,Abdulkadir,Usman,,STAFF,1986-12-23,2018-09-03,437475, M,Active,TRUE,FALSE,FALSE,@staff_6630
 1444,6631,ibraheemkyari@gmail.com,Abdullahi,Kyari,Ibrahim,,STAFF,1991-07-01,2018-09-03,437488, M,Active,TRUE,FALSE,FALSE,@staff_6631
@@ -1460,7 +1457,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1459,6656,belusmat@gmail.com,Bello,,Usman,,STAFF,1984-04-15,2018-09-03,441972, M,Active,TRUE,FALSE,FALSE,@staff_6656
 1460,6671,sherifat.omolara27@gmail.com,Sherifat,Omolara,Alabi,,STAFF,1987-08-27,2020-02-05,501889, F,Active,TRUE,FALSE,FALSE,@staff_6671
 1461,6706,iumusa25@gmail.com,Musa,Ibrahim,Usman,,STAFF,1994-11-07,2020-02-05,501911, M,Active,TRUE,FALSE,FALSE,@staff_6706
-1462,6732,rabsontwd@yahoo.com,Salihu,Sani,Rabiu,,STAFF,1984-06-23,2020-02-05,501898, M,Active,TRUE,FALSE,FALSE,@staff_6732
+1462,6732,,Salihu,Sani,Rabiu,,STAFF,1984-06-23,2020-02-05,501898, M,Active,TRUE,FALSE,FALSE,@staff_6732
 1463,6785,anasaidismail@gmail.com,Ismaila,Anas,Saidu,,STAFF,1986-04-03,2020-02-05,501884, M,Active,TRUE,FALSE,FALSE,@staff_6785
 1464,6792,lameenumar@gmail.com,Hassan,Umar,Aminu,,STAFF,1990-02-25,2020-02-05,502001, M,Active,TRUE,FALSE,FALSE,@staff_6792
 1465,6799,mohammedbolakale@yahoo.com,Ismail,Bolakale,Mohammed,,STAFF,2019-04-12,2020-02-05,501873, M,Active,TRUE,FALSE,FALSE,@staff_6799
@@ -1555,8 +1552,8 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1554,6339,titusabayomi808@gmail.com,Abayomi,,Titus,NC-Z,STAFF,1972-09-08,2016-06-20,390836, M,Active,TRUE,FALSE,FALSE,@staff_6339
 1555,6342,alarimaadegbola2018@gmail.com,Adegbola,Solomon,Alarima,,STAFF,1975-05-02,2016-08-31,390831, M,Active,TRUE,FALSE,FALSE,@staff_6342
 1556,6415,nkechip293@gmail.com,Precious,Ogwo,Eze,,STAFF,1974-12-19,2016-12-23,388157, F,Active,TRUE,FALSE,FALSE,@staff_6415
-1557,6455,ofer4pat@gmail.com,Favour,Chukwuloke,Monye,,STAFF,1992-04-13,2016-12-23,388162, F,Active,TRUE,FALSE,FALSE,@staff_6455
-1558,6457,NIL,Danladi,Kirfi,Ibrahim,,STAFF,1973-10-15,2016-12-23,387831, M,Active,TRUE,FALSE,FALSE,@staff_6457
+1557,6455,,Favour,Chukwuloke,Monye,,STAFF,1992-04-13,2016-12-23,388162, F,Active,TRUE,FALSE,FALSE,@staff_6455
+1558,6457,,Danladi,Kirfi,Ibrahim,,STAFF,1973-10-15,2016-12-23,387831, M,Active,TRUE,FALSE,FALSE,@staff_6457
 1559,6459,muhammadumarzaki30@gmail.com,Muhammed,,Umar,,STAFF,1993-08-10,2016-12-23,387904, M,Active,TRUE,FALSE,FALSE,@staff_6459
 1560,6460,mazbel83@gmail.com,Mu'azu,Muhammed,Bello,,STAFF,1983-04-04,2016-12-23,387902, M,Active,TRUE,FALSE,FALSE,@staff_6460
 1561,6464,chibuzojusty@gmail.com,Justina,Chibuzo,Omeje,,STAFF,1983-11-15,2016-12-23,388155, F,Active,TRUE,FALSE,FALSE,@staff_6464
@@ -1565,7 +1562,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1564,6467,favguimz@gmail.com,Mfon,Favour,Jacob,,STAFF,1995-01-16,2016-12-23,387969, M,Active,TRUE,FALSE,FALSE,@staff_6467
 1565,6472,bosmaol03@gmail.com,Johnson ,Olatubosun,Akande ,,STAFF,1983-07-07,2016-12-23,388165, M,Active,TRUE,FALSE,FALSE,@staff_6472
 1566,6473,adedejiariyo@yahoo.com,Ariyo ,Friday,Adedeji ,,STAFF,1981-02-07,2016-12-22,388076, M,Active,TRUE,FALSE,FALSE,@staff_6473
-1567,6474,favguimz@gmail.com,Alice,James,Suwunna,,STAFF,1986-01-17,2016-12-23,387962, F,Active,TRUE,FALSE,FALSE,@staff_6474
+1567,6474,,Alice,James,Suwunna,,STAFF,1986-01-17,2016-12-23,387962, F,Active,TRUE,FALSE,FALSE,@staff_6474
 1568,6476,aliyua6741@gmail.com,Aliyu,Alhaji,Aliyu,,STAFF,1998-04-12,2016-12-23,387901, M,Active,TRUE,FALSE,FALSE,@staff_6476
 1569,6488,ismailaonike12@gmail.com,Ismaila,Abu,Muhammed,PR&S,STAFF,1982-08-22,2016-12-23,387944, M,Active,TRUE,FALSE,FALSE,@staff_6488
 1570,6492,ammarkhaleed92@gmail.com,Ammar,Khalid,Muhammad,,STAFF,1992-06-09,2016-12-23,390835, M,Active,TRUE,FALSE,FALSE,@staff_6492
@@ -1575,7 +1572,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1574,6718,ikennamichael@gmail.com,Michael,Ikenna,Mbata,,STAFF,1992-09-01,2020-02-05,501916, M,Active,TRUE,FALSE,FALSE,@staff_6718
 1575,6416,happyomeje292@gmail.com,Happiness,Ndidi,Omeje,,STAFF,1990-10-27,2016-12-23,388152, F,Active,TRUE,FALSE,FALSE,@staff_6416
 1576,6454,agodspower@yahoo.com,Godspower,,Akpoghalino,SS-Z,STAFF,1983-12-01,2016-12-23,388064, M,Active,TRUE,FALSE,FALSE,@staff_6454
-1577,6468,animelv2017@yahoo.com,Austine,-,Ikhazobor,,STAFF,1982-08-01,2016-12-23,388092, M,Active,TRUE,FALSE,FALSE,@staff_6468
+1577,6468,,Austine,-,Ikhazobor,,STAFF,1982-08-01,2016-12-23,388092, M,Active,TRUE,FALSE,FALSE,@staff_6468
 1578,6471,seidusunny@gmail.com,Mohammed,Sunday ,Seidu ,,STAFF,1976-08-15,2016-12-23,388074, M,Active,TRUE,FALSE,FALSE,@staff_6471
 1579,6481,,Blessing,-,Jacob,,STAFF,1986-09-21,2016-12-23,387949, F,Active,TRUE,FALSE,FALSE,@staff_6481
 1580,6658,abdulazeeztitilope@gmail.com,Abdulkareem,Titilope,Abdulazeez,,STAFF,1985-03-10,2020-02-05,501886, M,Active,TRUE,FALSE,FALSE,@staff_6658
@@ -1591,7 +1588,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1590,6668,idokoelejo@gmail. Com,Comfort,Eleojo,Idoko,,STAFF,1979-09-17,2020-02-05,501922, F,Active,TRUE,FALSE,FALSE,@staff_6668
 1591,6669,msuleimanu88@gmail.com,,Mustapha,Suleiman,,STAFF,1991-11-09,2020-02-05,501923, M,Active,TRUE,FALSE,FALSE,@staff_6669
 1592,6670,kolabawa@gmail.com,Ismaila,Yakub,Bawa,,STAFF,1985-12-18,2020-02-05,501994, M,Active,TRUE,FALSE,FALSE,@staff_6670
-1593,6672,ebenezerbolade09@gmail.com,Ushang,Blessing,Ekpe,,STAFF,1994-03-13,2020-02-05,501885, F,Active,TRUE,FALSE,FALSE,@staff_6672
+1593,6672,,Ushang,Blessing,Ekpe,,STAFF,1994-03-13,2020-02-05,501885, F,Active,TRUE,FALSE,FALSE,@staff_6672
 1594,6673,eseadimj@gmail.com,Asika,Maryjane,Eseadi,,STAFF,1988-12-14,2020-02-05,501925, F,Active,TRUE,FALSE,FALSE,@staff_6673
 1595,6674,issafat001@gmail.com ,Fatima,Issa,Ibrahim,,STAFF,1993-11-14,2020-02-05,501860, F,Active,TRUE,FALSE,FALSE,@staff_6674
 1596,6675,ndamanibrahim@gmail.com,Ibrahim,Ndaman,Ibrahim,,STAFF,1991-09-28,2020-02-05,501983, M,Active,TRUE,FALSE,FALSE,@staff_6675
@@ -1645,7 +1642,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1644,6738,sarkibuhari112@gmail.com,Buhari,Usman,Sarki,,STAFF,1989-08-15,2020-02-05,501882, M,Active,TRUE,FALSE,FALSE,@staff_6738
 1645,6739,shamsubala011@gmail.com,Shamsudeen,,Bala,,STAFF,1994-06-04,2020-02-05,501975, M,Active,TRUE,FALSE,FALSE,@staff_6739
 1646,6741,usmanabdulraheemdare@gmail.com,Dare,Usman,Abdulraheem,,STAFF,1987-07-26,2020-02-05,501844, M,Active,TRUE,FALSE,FALSE,@staff_6741
-1647,6742,usmanh23@gmail.com,Usman,,Hassan,,STAFF,1990-08-30,2020-02-05,501931, M,Active,TRUE,FALSE,FALSE,@staff_6742
+1647,6742,,Usman,,Hassan,,STAFF,1990-08-30,2020-02-05,501931, M,Active,TRUE,FALSE,FALSE,@staff_6742
 1648,6743,uflachiever@gmail.com,,Florence,Usuwah,F&A,STAFF,1984-11-29,2020-02-05,501960, F,Active,TRUE,FALSE,FALSE,@staff_6743
 1649,6745,omokestanley@gmail.com,Onyekachi,Stanley,Omoke,,STAFF,1980-01-14,2020-02-05,501934, M,Active,TRUE,FALSE,FALSE,@staff_6745
 1650,6746,Meenayakubu01@gmail.com,Umar,Amina,Yakubu,,STAFF,1999-04-06,2020-02-05,501930, F,Active,TRUE,FALSE,FALSE,@staff_6746
@@ -1807,7 +1804,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1806,6976,harrisokolie@gmail.com,Chekwube,Harris,Oliver,REP,STAFF,1994-01-07,2020-02-05,500856, F,Active,TRUE,FALSE,FALSE,@staff_6976
 1807,6977,khtijjani@gmail.com,Haruna,Khadija,Tijjani,,STAFF,1998-10-28,2020-02-05,500844, F,Active,TRUE,FALSE,FALSE,@staff_6977
 1808,6978,zubairuoyamine@gmail.com,Rahanat,Oyamine,Zubair,NW-Z,STAFF,1989-08-02,2020-02-05,500910, F,Active,TRUE,FALSE,FALSE,@staff_6978
-1809,6979,rabsontwd@yahoo.com,Zango,Hamisu,Abubakar,,STAFF,1995-01-01,2020-02-05,500846, M,Active,TRUE,FALSE,FALSE,@staff_6979
+1809,6979,,Zango,Hamisu,Abubakar,,STAFF,1995-01-01,2020-02-05,500846, M,Active,TRUE,FALSE,FALSE,@staff_6979
 1810,6980,khadijamansuribrahi@gmail.com,Ibrahim,Khadija,Mansur,,STAFF,1994-04-12,2020-02-05,500842, F,Active,TRUE,FALSE,FALSE,@staff_6980
 1811,6981,aghoghowilliams03@yahoo.com,Agbiwe Choice,Aghogho,Williams,,STAFF,1981-05-15,2020-02-05,500902, F,Active,TRUE,FALSE,FALSE,@staff_6981
 1812,6982,mohammedjimi8@gmail.com,,Mohammed,Alkali,NW-Z,STAFF,1988-05-05,2020-02-05,500985, M,Active,TRUE,FALSE,FALSE,@staff_6982
@@ -1869,7 +1866,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1868,7031,abumaryam306@gmail.com,Nurudeen,,Murtala ,,STAFF,1983-03-03,2022-01-17,526576,M,Active,TRUE,FALSE,FALSE,@staff_7031
 1869,7032,szulaidaini@gmail.com,Zulaidaini,Maishanu,Sani,,STAFF,1994-12-15,2022-01-17,526587,M,Active,TRUE,FALSE,FALSE,@staff_7032
 1870,7035,Priscaauta92@gmail.com,Prisca,Kyauta,Nuhu,,STAFF,1987-03-31,2022-01-17,526596,F,Active,TRUE,FALSE,FALSE,@staff_7035
-1871,7036,obichinwe15@gmail.com,Oluoma,Chinwendu,Offor,,STAFF,1985-08-21,2022-01-17,526607,F,Active,TRUE,FALSE,FALSE,@staff_7036
+1871,7036,,Oluoma,Chinwendu,Offor,,STAFF,1985-08-21,2022-01-17,526607,F,Active,TRUE,FALSE,FALSE,@staff_7036
 1872,7037,,Abdulhamid,Munir,Alkasim,,STAFF,1996-10-29,2022-01-17,526599,M,Active,TRUE,FALSE,FALSE,@staff_7037
 1873,7040,zainabmohammed@gmail.com,Zainab,Ikwogya,Muhammed,,STAFF,1994-01-03,2022-01-17,526571,F,Active,TRUE,FALSE,FALSE,@staff_7040
 1874,7041,rajasabo1989@gmail.com,Murjanatu,Abdulkareem,Sabo,,STAFF,1990-05-10,2022-01-17,526612,F,Active,TRUE,FALSE,FALSE,@staff_7041
@@ -2000,10 +1997,10 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 1999,3552,ugela2015@yahoo.com,Terzungwe,,Ugela,,STAFF,1966-05-04,1992-04-09,171256, M,Active,TRUE,FALSE,FALSE,@staff_3552
 2000,3755,,Adebanjo,,Ajayi,,STAFF,1965-01-01,1992-06-15,171725, M,Active,TRUE,FALSE,FALSE,@staff_3755
 2001,3952,olamfash@yahoo.com,Adeyemi,Olumide,Fashina,,STAFF,1968-08-19,1992-06-09,171930, M,Active,TRUE,FALSE,FALSE,@staff_3952
-2002,4370,animelv2017@yahoo.com,Edith,Afuwa,Makonjuola,,STAFF,1972-07-11,1994-07-15,170906, F,Active,TRUE,FALSE,FALSE,@staff_4370
+2002,4370,,Edith,Afuwa,Makonjuola,,STAFF,1972-07-11,1994-07-15,170906, F,Active,TRUE,FALSE,FALSE,@staff_4370
 2003,4597,theresafedrick@gmail.com,Theressa,Frederick,Odo,NC-Z,STAFF,1968-03-03,1995-07-24,169615, F,Active,TRUE,FALSE,FALSE,@staff_4597
 2004,4696,bishopbamidele1005@gmail.com,Dorcas,Olaitan,Adewole,,STAFF,1966-12-02,1998-06-01,172180, F,Active,TRUE,FALSE,FALSE,@staff_4696
-2005,4950,                      NIL,Fajimi,,Timothy,,STAFF,1966-12-29,2002-04-17,170517, M,Active,TRUE,FALSE,FALSE,@staff_4950
+2005,4950,,Fajimi,,Timothy,,STAFF,1966-12-29,2002-04-17,170517, M,Active,TRUE,FALSE,FALSE,@staff_4950
 2006,5113,enimesominesei@gmail.com,Enemesom,Rambo,Inesei,,STAFF,1976-08-07,2004-03-31,170700, M,Active,TRUE,FALSE,FALSE,@staff_5113
 2007,5185,ahmedyila@yahoo.com,Ahmed,,Yila,,STAFF,1977-05-01,2005-07-01,191639, M,Active,TRUE,FALSE,FALSE,@staff_5185
 2008,5254,oluwolethomas@gmail.com,Thomas,Oluwole,Olaniyi,,STAFF,1979-02-10,2009-05-11,171698, M,Active,TRUE,FALSE,FALSE,@staff_5254
@@ -2023,7 +2020,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 2022,6042,oluwasegunmoses70@gmail.com,Oluwasegun,Moses,Awotayo,TRANS,STAFF,1972-01-20,2012-07-20,169789, M,Active,TRUE,FALSE,FALSE,@staff_6042
 2023,3318,abrahamukpai0@gmail.com,Ekpezu,Abraham,Ukpai,,STAFF,1968-02-28,1991-05-21,171095, M,Active,TRUE,FALSE,FALSE,@staff_3318
 2024,3828,orokgospel@gmail.com,Cecilia,Theodore,Orok,,STAFF,1965-07-25,1992-11-02,171274, F,Active,TRUE,FALSE,FALSE,@staff_3828
-2025,4926,NIL,Tanko,,Abdullahi,,STAFF,1968-12-09,2000-12-13,206686, M,Active,TRUE,FALSE,FALSE,@staff_4926
+2025,4926,,Tanko,,Abdullahi,,STAFF,1968-12-09,2000-12-13,206686, M,Active,TRUE,FALSE,FALSE,@staff_4926
 2026,4988,okeowoolanike71@gmail.com,Patience,Olanike,Okeowo,,STAFF,1975-02-28,2002-11-06,171808, M,Active,TRUE,FALSE,FALSE,@staff_4988
 2027,5186,nwaubanigodwin@gmail.com,Godwin,Sunday,Nwaubani,,STAFF,1967-08-14,2005-03-03,192148, M,Active,TRUE,FALSE,FALSE,@staff_5186
 2028,5535,oyeniyilateef74@gmail.com,Lateef,,Oyeniyi,,STAFF,1974-05-10,2011-01-31,172055, M,Active,TRUE,FALSE,FALSE,@staff_5535
@@ -2032,15 +2029,15 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 2031,5147,ekitinde@yahoo.com,Mary,Oluyemisi,Awe,,STAFF,1971-06-28,2004-09-01,171545, F,Active,TRUE,FALSE,FALSE,@staff_5147
 2032,6338,,Rafiu,Oladimeji,Abomide,P&U,STAFF,1968-04-17,2016-06-20,387958, M,Active,TRUE,FALSE,FALSE,@staff_6338
 2033,6458,auwaladamugky@gmail.com,Adamu,,Auwalu,,STAFF,1987-10-06,2016-12-23,387835, M,Active,TRUE,FALSE,FALSE,@staff_6458
-2034,6461,NIL,Adamu,,Abdukadir,,STAFF,1988-08-06,2016-12-23,387837, M,Active,TRUE,FALSE,FALSE,@staff_6461
+2034,6461,,Adamu,,Abdukadir,,STAFF,1988-08-06,2016-12-23,387837, M,Active,TRUE,FALSE,FALSE,@staff_6461
 2035,5378,anneukeme6@gmail.com,Anne,Ukeme,Archibong,,STAFF,1985-12-10,2011-02-01,170936, M,Active,TRUE,FALSE,FALSE,@staff_5378
 2036,6233,oderindeadewale1986@gmail.com,Adewale,,Oderinde,,STAFF,1986-10-22,2014-11-03,345632, M,Active,TRUE,FALSE,FALSE,@staff_6233
 2037,5187,ibiamchinyere@gmail.com ,Nkama,Chinyere,Ibiam,,STAFF,1978-10-05,2005-10-04,192052, F,Active,TRUE,FALSE,FALSE,@staff_5187
 2038,5223,,Gideon,,Salifu,IPR,STAFF,1975-03-17,2007-09-24,169972, M,Active,TRUE,FALSE,FALSE,@staff_5223
 2039,5688,tijaniadebayo49@gmail.com,Adebayo,Tijani,Jamiu,,STAFF,1979-07-20,2011-11-24,172014, M,Active,TRUE,FALSE,FALSE,@staff_5688
-2040,6255,-,Adiele,U,Christopher,,STAFF,1973-12-12,2015-06-30,358582, M,Active,TRUE,FALSE,FALSE,@staff_6255
+2040,6255,,Adiele,U,Christopher,,STAFF,1973-12-12,2015-06-30,358582, M,Active,TRUE,FALSE,FALSE,@staff_6255
 2041,6482,isaiahojeleye@gmail.con,Isaiah,Dele,Ojeleye,,STAFF,1989-09-25,2016-12-22,388120, M,Active,TRUE,FALSE,FALSE,@staff_6482
-2042,6574,Nil,Musa,Tanimu,Abubakar,,STAFF,1970-11-18,2018-09-03,428078, M,Active,TRUE,FALSE,FALSE,@staff_6574
+2042,6574,,Musa,Tanimu,Abubakar,,STAFF,1970-11-18,2018-09-03,428078, M,Active,TRUE,FALSE,FALSE,@staff_6574
 2043,6676,rukayyahalhassan082@gmail.com,Rukayya,,Alhassan,INSP,STAFF,1982-11-07,2020-02-05,502006, F,Active,TRUE,FALSE,FALSE,@staff_6676
 2044,6702,hannatuyunusa76@gmail.com,Hannatu,,Yunusa,,STAFF,1984-10-06,2020-02-05,502008, F,Active,TRUE,FALSE,FALSE,@staff_6702
 2045,6737,"muh,dsaratukabir@gmail.com",Kabir,Muhammad,Saratu,,STAFF,1996-01-25,2020-02-05,501825, F,Active,TRUE,FALSE,FALSE,@staff_6737
@@ -2061,7 +2058,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 2060,5613,kpegasinclement@gmail.com,Clement,Dume,Kpegasin,,STAFF,1977-08-28,2011-03-28,171203, M,Active,TRUE,FALSE,FALSE,@staff_5613
 2061,5880,peterbisu2013@yahoo.com,Peter,Bunu,Bisu,,STAFF,1979-05-05,2011-10-10,191455, M,Active,TRUE,FALSE,FALSE,@staff_5880
 2062,6044,,Faruk,Salihu,Yakubu,,STAFF,1969-08-08,2012-07-20,170051, M,Active,TRUE,FALSE,FALSE,@staff_6044
-2063,5317,NIL,Abdulkadir,,Jabiru ,,STAFF,1980-08-25,2010-08-12,192803, M,Active,TRUE,FALSE,FALSE,@staff_5317
+2063,5317,,Abdulkadir,,Jabiru ,,STAFF,1980-08-25,2010-08-12,192803, M,Active,TRUE,FALSE,FALSE,@staff_5317
 2064,6221,iliyasujibrinrimaye12@gmail.com,Rimaye,Jibrin,Iliyasu ,,STAFF,1966-04-14,2013-06-18,227070, M,Active,TRUE,FALSE,FALSE,@staff_6221
 2065,6258,,Magit,Vou,Bulus,,STAFF,1971-12-12,2015-10-16,365563, M,Active,TRUE,FALSE,FALSE,@staff_6258
 2066,6333,,Luka,,Samuel,,STAFF,1985-01-24,2015-12-07,371425, M,Active,TRUE,FALSE,FALSE,@staff_6333
@@ -2072,7 +2069,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 2071,5495,aguombaelizabeth@yahoo.com,Cherechi,,Aguomba,,STAFF,1983-07-17,2011-01-28,170805, F,Active,TRUE,FALSE,FALSE,@staff_5495
 2072,6571,abdullahibagudu@gmail.com,Balarabe,Bagudu,Abdullahi,,STAFF,1994-03-04,2018-09-03,427908, M,Active,TRUE,FALSE,FALSE,@staff_6571
 2073,6573,aleeyubagudu8@gmail.com,Balarabe,Bagudu,Aliyu,,STAFF,1995-10-05,2018-09-03,428085, M,Active,TRUE,FALSE,FALSE,@staff_6573
-2074,6575,nill,Gambo,,Kasim,,STAFF,1969-11-15,2018-09-03,427786, M,Active,TRUE,FALSE,FALSE,@staff_6575
+2074,6575,,Gambo,,Kasim,,STAFF,1969-11-15,2018-09-03,427786, M,Active,TRUE,FALSE,FALSE,@staff_6575
 2075,6605,najibsalisu82@gmail.com,Salisu,,Najib,,STAFF,1994-03-14,2018-09-03,427748, M,Active,TRUE,FALSE,FALSE,@staff_6605
 2076,6620,amirusani2018@gmail.com,Sani,,Amiru,,STAFF,1984-07-04,2018-09-03,427798, M,Active,TRUE,FALSE,FALSE,@staff_6620
 2077,6634,smb65680633@gmail.com,Baba,Mohammed,Shuaibu,,STAFF,1985-01-01,2018-09-03,437481, M,Active,TRUE,FALSE,FALSE,@staff_6634
@@ -2092,7 +2089,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 2091,7202,,Joy,Ogochukwu,Ogbonna,,STAFF,,2023-10-31,562214,F,Active,TRUE,FALSE,FALSE,@staff_7202
 2092,7231,,Bosse,Mohammed,Zara,,STAFF,1993-01-01,2023-10-31,,F,Active,TRUE,FALSE,FALSE,@staff_7231
 2093,4429,suleimanabdulkadir100@gmail.com,Suleiman,,Abdulkadir,,STAFF,1971-08-22,1994-02-01,191986, M,Active,TRUE,FALSE,FALSE,@staff_4429
-2094,4822,NIL,Akilu,,Ibrahim ,,STAFF,1975-05-12,1998-11-30,193496, M,Active,TRUE,FALSE,FALSE,@staff_4822
+2094,4822,,Akilu,,Ibrahim ,,STAFF,1975-05-12,1998-11-30,193496, M,Active,TRUE,FALSE,FALSE,@staff_4822
 2095,5022,abrahamfaseyi@gmail.com,Abraham,,Fasaeyi,,STAFF,1978-12-23,2003-01-15,171630, F,Active,TRUE,FALSE,FALSE,@staff_5022
 2096,5061,bashirsambo78@gmail.com,Bashir,,Sambo,,STAFF,1978-11-17,2003-08-13,193009, M,Active,TRUE,FALSE,FALSE,@staff_5061
 2097,6511,stephennde2020@gmail.com,Stephen,Oghoyakpo,Asagba,,STAFF,1976-08-11,2016-12-23,390828, M,Active,TRUE,FALSE,FALSE,@staff_6511
@@ -2103,17 +2100,17 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 2102,6834,,Owuna,Silas,Oga,TRANS,STAFF,1984-05-05,2020-02-05,501986, M,Active,TRUE,FALSE,FALSE,@staff_6834
 2103,6835,,Y,Idris,Ibrahim,TRANS,STAFF,1972-10-10,2020-02-05,501827, M,Active,TRUE,FALSE,FALSE,@staff_6835
 2104,6837,abualhassas1414@gmailcom,Alhassan,,Abu,,STAFF,1994-01-11,2020-02-05,501935, M,Active,TRUE,FALSE,FALSE,@staff_6837
-2105,6838,-,Sanusi,,Haruna,,STAFF,1987-10-10,2020-02-05,501926, M,Active,TRUE,FALSE,FALSE,@staff_6838
+2105,6838,,Sanusi,,Haruna,,STAFF,1987-10-10,2020-02-05,501926, M,Active,TRUE,FALSE,FALSE,@staff_6838
 2106,6839,aminuabubakar2290@gmail.com ,Aminu,,Abubakar,,STAFF,1985-08-21,2020-02-05,501836, M,Active,TRUE,FALSE,FALSE,@staff_6839
 2107,6840,salaabubakar123@gmail,Sala,,Abubakar,,STAFF,1972-08-18,2020-02-05,501895, M,Active,TRUE,FALSE,FALSE,@staff_6840
 2108,6841,mohammedbabamohammed83@gmail.com,Baba,,Mohammed,TRANS,STAFF,1983-12-31,2020-02-05,501852, M,Active,TRUE,FALSE,FALSE,@staff_6841
 2109,6843,,Yusufu,,Daniel,TRANS,STAFF,1991-11-14,2020-02-05,505964, M,Active,TRUE,FALSE,FALSE,@staff_6843
 2110,6844,,Ali,Aliyu,Inusa,TRANS,STAFF,1988-09-01,2020-02-05,501901, M,Active,TRUE,FALSE,FALSE,@staff_6844
 2111,6845,adanusaidua3@gmail.com,Saidu,Adamu,Aliyu,,STAFF,1975-12-30,2020-02-05,501862, M,Active,TRUE,FALSE,FALSE,@staff_6845
-2112,6846,NIL,Daura,Lawal,Aminu,,STAFF,1979-02-06,2020-02-05,501835, M,Active,TRUE,FALSE,FALSE,@staff_6846
+2112,6846,,Daura,Lawal,Aminu,,STAFF,1979-02-06,2020-02-05,501835, M,Active,TRUE,FALSE,FALSE,@staff_6846
 2113,6849,ajirotutukayode@gmail.com,Kayode,Kayode,Ajirotutu,SW-Z,STAFF,1979-02-15,2020-02-05,501868, M,Active,TRUE,FALSE,FALSE,@staff_6849
 2114,6850,folayantimilehin384@gmail.com,Emmanuel,Timilehin,Folayan,,STAFF,1994-06-08,2020-02-05,501829, M,Active,TRUE,FALSE,FALSE,@staff_6850
-2115,6854,Nil,Dalhatu,,Abubakar,,STAFF,1977-02-02,2020-02-05,506143, M,Active,TRUE,FALSE,FALSE,@staff_6854
+2115,6854,,Dalhatu,,Abubakar,,STAFF,1977-02-02,2020-02-05,506143, M,Active,TRUE,FALSE,FALSE,@staff_6854
 2116,6855,,Mohammed,,Jamilu,NW-Z,STAFF,1985-12-22,2020-02-05,501890, M,Active,TRUE,FALSE,FALSE,@staff_6855
 2117,6857,abubakarrabiu2461985@gmail.com ,Rabiu,,Abubakar,STORES,STAFF,1985-06-24,2020-02-05,501961, M,Active,TRUE,FALSE,FALSE,@staff_6857
 2118,6858,,Umar,,Mohammed,TRANS,STAFF,1990-12-25,2020-02-05,501855, M,Active,TRUE,FALSE,FALSE,@staff_6858
@@ -2133,7 +2130,7 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 2132,6640,ahmedmohammedibrahim1985@gmail.com,Ibrahim,Ahmadu,Mohammed,NW-Z,STAFF,1985-05-05,2018-09-03,437566, M,Active,TRUE,FALSE,FALSE,@staff_6640
 2133,6842,,Ndaman,Bilkisu,Muhammed,,STAFF,1985-08-28,2020-02-05,501980, F,Active,TRUE,FALSE,FALSE,@staff_6842
 2134,6847,NOT SUBMITTED,Aliyu,,Zakari,,STAFF,1986-05-01,2020-02-05,501972, M,Active,TRUE,FALSE,FALSE,@staff_6847
-2135,6848,usmanh23@gmail.com,Usman,Shehu,Abdullahi,,STAFF,1992-01-01,2020-02-05,501927, M,Active,TRUE,FALSE,FALSE,@staff_6848
+2135,6848,,Usman,Shehu,Abdullahi,,STAFF,1992-01-01,2020-02-05,501927, M,Active,TRUE,FALSE,FALSE,@staff_6848
 2136,6851,danbusaye@gmail.com,Dahiru,Muhammad,Abba,,STAFF,1994-02-14,2020-02-05,501966, M,Active,TRUE,FALSE,FALSE,@staff_6851
 2137,6852,ibrahimnasiru853@gmail.com ,Nasiru,,Ibrahim,,STAFF,1988-03-03,2020-02-05,501894, M,Active,TRUE,FALSE,FALSE,@staff_6852
 2138,6966,nurudeenmusa585@gmail.com,Yamset,Nurudeen,Musa,,STAFF,1990-07-21,2020-02-05,500988, M,Active,TRUE,FALSE,FALSE,@staff_6966
@@ -2145,3 +2142,5 @@ id,employee_id,email,first_name,middle_name,last_name,department,role,date_of_bi
 2144,4996,mariyamoh4live@yahoo.com,Mariya,,Mohammed,,STAFF,1981-06-06,2002-09-27,191630, F,Active,TRUE,FALSE,FALSE,@staff_4996
 2145,5192,muntarihudusuleiman@gmail.com,Muktar,Suleiman,Hudu,,STAFF,1973-06-05,2005-12-22,192423, M,Active,TRUE,FALSE,FALSE,@staff_5192
 2146,6647,iu532921@gmail.com,Ibrahim,,Usman,,STAFF,1993-03-20,2018-09-03,445717, M,Active,TRUE,FALSE,FALSE,@staff_6647
+1,7233,,Agara,Ali,Silas,DG,DG,1972-04-04,2024-07-12,496500, M,Active,TRUE,TRUE,TRUE,@staff_7233
+916,5948,nnejalala@yahoo.com,Ogochukwu,Nneoma,Odo,IPR,IT_ADMIN,1988-01-11,2011-10-15,205748, F,Active,TRUE,TRUE,TRUE,@staff_5948
