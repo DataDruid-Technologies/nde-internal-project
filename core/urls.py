@@ -5,7 +5,8 @@ from . import views
 urlpatterns = [
     path('', views.login_view, name='login'),
     path('logout/', views.custom_logout, name='logout'),
-    path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+
     
     # Employee management
     path('employees/list/', views.employee_list, name='employee_list'),
@@ -23,5 +24,10 @@ urlpatterns = [
     path('workflows/<int:pk>/', views.workflow_detail, name='workflow_detail'),
     path('workflow-instances/create/', views.workflow_instance_create, name='workflow_instance_create'),
     path('workflow-instances/<int:pk>/', views.workflow_instance_detail, name='workflow_instance_detail'),
+
+    path('inbox/', views.InboxListView.as_view(), name='inbox_list'),
+    path('inbox/<int:pk>/', views.InboxDetailView.as_view(), name='inbox_detail'),
+    path('inbox/create/', views.InboxCreateView.as_view(), name='inbox_create'),
+    path('inbox/<int:pk>/delete/', views.InboxDeleteView.as_view(), name='inbox_delete'),
 
 ]

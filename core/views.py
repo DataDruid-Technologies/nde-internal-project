@@ -43,68 +43,101 @@ def custom_logout(request):
     return redirect('login')
 
 
-@login_required
-def dashboard_view(request):
-    user = request.user
-    context = {
-        'user': user,
-        'total_employees': Employee.objects.count(),
-        'total_departments': Department.objects.count(),
-        'active_projects': Project.objects.filter(status='ACTIVE').count(),
-        'pending_tasks': Task.objects.filter(status='PENDING').count(),
-        'recent_announcements': Announcement.objects.order_by('-created_at')[:5],
-    }
+# @login_required
+# def dashboard_view(request):
+#     user = request.user
+#     context = {
+#         'employee': Employee.objects,
+#         'user': user,
+#         'total_employees': Employee.objects.count(),
+#         'total_departments': Department.objects.count(),
+#         'active_projects': Project.objects.filter(status='ACTIVE').count(),
+#         'pending_tasks': Task.objects.filter(status='PENDING').count(),
+#         'recent_announcements': Announcement.objects.order_by('-created_at')[:5],
+#         'recent_inbox': InboxMessage.objects.filter()
+#     }
 
-    if user.role == 'DG':
-        context.update({
-            'department_stats': Department.objects.annotate(employee_count=Count('employees')),
-            'recent_hires': Employee.objects.order_by('-date_joined')[:5],
-        })
-    elif user.role in ['DIR', 'ZD']:
-        context.update({
-            'managed_departments': Department.objects.filter(director=user),
-            'department_projects': Project.objects.filter(department__director=user).order_by('-start_date')[:5],
-        })
-    elif user.role == 'HOD':
-        context.update({
-            'department': user.department,
-            'department_employees': Employee.objects.filter(department=user.department).count(),
-            'department_projects': Project.objects.filter(department=user.department).order_by('-start_date')[:5],
-            'pending_tasks': Task.objects.filter(assigned_to__department=user.department, status='PENDING').count(),
-        })
-    else:
-        context.update({
-            'my_tasks': Task.objects.filter(assigned_to=user).order_by('due_date')[:5],
-            'my_projects': Project.objects.filter(team_members=user).order_by('-start_date')[:3],
-        })
+#     if user.role == 'DG':
+#         context.update({
+#             'department_stats': Department.objects.annotate(employee_count=Count('employees')),
+#             'recent_hires': Employee.objects.order_by('-date_joined')[:5],
+#         })
+#     elif user.role in ['DIR', 'ZD']:
+#         context.update({
+#             'managed_departments': Department.objects.filter(director=user),
+#             'department_projects': Project.objects.filter(department__director=user).order_by('-start_date')[:5],
+#         })
+#     elif user.role == 'HOD':
+#         context.update({
+#             'department': user.department,
+#             'department_employees': Employee.objects.filter(department=user.department).count(),
+#             'department_projects': Project.objects.filter(department=user.department).order_by('-start_date')[:5],
+#             'pending_tasks': Task.objects.filter(assigned_to__department=user.department, status='PENDING').count(),
+#         })
+#     else:
+#         context.update({
+#             'my_tasks': Task.objects.filter(assigned_to=user).order_by('due_date')[:5],
+#             'my_projects': Project.objects.filter(team_members=user).order_by('-start_date')[:3],
+#         })
 
-    return render(request, 'dashboards/dashboard.html', context)
+#     return render(request, 'dashboards/dashboard.html', context)
+
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+
+class DashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'dashboards/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        # Common context data
+        context['total_employees'] = Employee.objects.count()
+        context['total_departments'] = Department.objects.count()
+        context['active_projects'] = Project.objects.filter(status='ACTIVE').count()
+        context['pending_tasks'] = Task.objects.filter(status='PENDING').count()
+        context['recent_announcements'] = Announcement.objects.order_by('-created_at')[:5]
+
+        # Role-specific context data
+        if user.role == 'DG':
+            context['department_stats'] = Department.objects.annotate(employee_count=models.Count('employees'))
+            context['recent_hires'] = Employee.objects.order_by('-date_joined')[:5]
+        elif user.role in ['DIR', 'ZD']:
+            context['managed_departments'] = Department.objects.filter(employees__role__in=['DIR', 'ZD'])
+            context['department_projects'] = Project.objects.filter(department__employees__role__in=['DIR', 'ZD']).order_by('-start_date')[:5]
+        elif user.role in ['HOD', 'HOU']:
+            context['department'] = user.department
+            context['department_employees'] = user.department.employees.count()
+            context['department_projects'] = Project.objects.filter(department=user.department).order_by('-start_date')[:5]
+        else:  # Regular staff and IT Admin
+            context['my_tasks'] = Task.objects.filter(assigned_to=user).order_by('due_date')[:5]
+            context['my_projects'] = Project.objects.filter(team_members=user).order_by('-start_date')[:5]
+
+        return context
+    
 
 @login_required
 def chat_view(request):
     chats = ChatMessage.objects.filter(Q(sender=request.user) | Q(recipient=request.user)).order_by('-timestamp')
     return render(request, 'core/chat.html', {'chats': chats})
 
-@login_required
-def inbox_view(request):
-    messages = InboxMessage.objects.filter(recipient=request.user).order_by('-timestamp')
-    return render(request, 'core/inbox.html', {'messages': messages})
-
 
 @login_required
-# @user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD'])
+@user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD', 'SD'])
 def employee_list(request):
     employees = Employee.objects.all()
     return render(request, 'employees/employee_list.html', {'employees': employees})
 
 @login_required
-# @user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD'])
+@user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD', 'SD'])
 def employee_detail(request, employee_id):
     employee = get_object_or_404(Employee, employee_id=employee_id)
     return render(request, 'employees/employee_detail.html', {'employee': employee})
 
 @login_required
-# @user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD'])
+@user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD', 'SD'])
 def employee_create(request):
     if request.method == 'POST':
         form = EmployeeCreationForm(request.POST)
@@ -123,7 +156,7 @@ def employee_create(request):
     return render(request, 'employees/employee_form.html', {'form': form, 'detail_form': detail_form})
 
 @login_required
-# @user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD'])
+@user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD', 'SD'])
 def employee_update(request, employee_id):
     employee = get_object_or_404(Employee, employee_id=employee_id)
     
@@ -151,7 +184,7 @@ def employee_update(request, employee_id):
 
 
 @login_required
-# @user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD'])
+@user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD', 'SD'])
 def assign_role(request, employee_id):
     employee = get_object_or_404(Employee, employee_id=employee_id)
     if request.method == 'POST':
@@ -346,28 +379,77 @@ def chat_detail(request, user_id):
         'form': form
     })
 
-@login_required
-def inbox_list(request):
-    inbox_messages = InboxMessage.objects.filter(recipient=request.user).order_by('-timestamp')
-    return render(request, 'core/inbox_list.html', {'inbox_messages': inbox_messages})
+# views.py
+from django.views.generic import ListView, DetailView, CreateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
 
-@login_required
-def inbox_detail(request, message_id):
-    message = InboxMessage.objects.get(id=message_id, recipient=request.user)
-    message.is_read = True
-    message.save()
-    return render(request, 'core/inbox_detail.html', {'message': message})
 
-@login_required
-def compose_message(request):
-    if request.method == 'POST':
-        form = InboxMessageForm(request.POST)
-        if form.is_valid():
-            message = form.save(commit=False)
-            message.sender = request.user
-            message.save()
-            return redirect('inbox_list')
-    else:
-        form = InboxMessageForm()
-    return render(request, 'core    /compose_message.html', {'form': form})
+# Inbox Views
+class InboxListView(LoginRequiredMixin, ListView):
+    model = InboxMessage
+    template_name = 'inbox/inbox_list.html'
+    context_object_name = 'messages'
+
+    def get_queryset(self):
+        return InboxMessage.objects.filter(
+            Q(recipient=self.request.user) | Q(sender=self.request.user)
+        ).order_by('-timestamp')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['incoming'] = self.get_queryset().filter(recipient=self.request.user)
+        context['outgoing'] = self.get_queryset().filter(sender=self.request.user)
+        return context
+
+class InboxDetailView(LoginRequiredMixin, DetailView):
+    model = InboxMessage
+    template_name = 'inbox/inbox_detail.html'
+    context_object_name = 'message'
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if not obj.is_read:
+            obj.is_read = True
+            obj.save()
+        return obj
+
+class InboxCreateView(LoginRequiredMixin, CreateView):
+    model = InboxMessage
+    form_class = InboxMessageForm
+    template_name = 'inbox/inbox_form.html'
+    success_url = reverse_lazy('inbox_list')
+
+    def form_valid(self, form):
+        form.instance.sender = self.request.user
+        return super().form_valid(form)
+
+class InboxDeleteView(LoginRequiredMixin, DeleteView):
+    model = InboxMessage
+    template_name = 'inbox/inbox_confirm_delete.html'
+    success_url = reverse_lazy('inbox_list')
+
+    def get_queryset(self):
+        return InboxMessage.objects.filter(recipient=self.request.user)
+
+# Chat Views
+class ChatListView(LoginRequiredMixin, ListView):
+    model = ChatMessage
+    template_name = 'core/chat/chat_list.html'
+    context_object_name = 'messages'
+
+    def get_queryset(self):
+        return ChatMessage.objects.filter(
+            Q(sender=self.request.user) | Q(recipient=self.request.user)
+        ).order_by('-timestamp')
+
+class ChatCreateView(LoginRequiredMixin, CreateView):
+    model = ChatMessage
+    form_class = ChatMessageForm
+    template_name = 'core/chat/chat_form.html'
+    success_url = reverse_lazy('chat_list')
+
+    def form_valid(self, form):
+        form.instance.sender = self.request.user
+        return super().form_valid(form)
 

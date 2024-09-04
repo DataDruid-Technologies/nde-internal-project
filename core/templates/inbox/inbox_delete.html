@@ -1,0 +1,19 @@
+<!-- templates/inbox/inbox_confirm_delete.html -->
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_content %}
+<div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Confirm Delete</h2>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">Are you sure you want to delete this message?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+            Confirm Delete
+        </button>
+        <a href="{% url 'inbox:list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded ml-2">
+            Cancel
+        </a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+<!-- core/templates/core/inbox/inbox_form.html -->
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_content %}
+<div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Compose Message</h2>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label for="{{ form.recipient.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Recipient
+            </label>
+            {{ form.recipient }}
+        </div>
+        <div>
+            <label for="{{ form.subject.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Subject
+            </label>
+            {{ form.subject }}
+        </div>
+        <div>
+            <label for="{{ form.content.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Message
+            </label>
+            {{ form.content }}
+        </div>
+        <div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Send Message
+            </button>
+            <a href="{% url 'inbox_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded ml-2">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
