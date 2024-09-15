@@ -4,7 +4,8 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column
 from .models import *
 from django_ckeditor_5.widgets import CKEditor5Widget
-
+from datetime import datetime
+from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 
 class RoleForm(forms.ModelForm):
     class Meta:
@@ -220,22 +221,80 @@ class RoleAssignmentForm(forms.ModelForm):
 # Workflow Steps
 
 
-class WorkflowStepForm(forms.ModelForm):
-    class Meta:
-        model = WorkflowStep
-        fields = ['name', 'description', 'order', 'required_role']
-
-
 class WorkflowForm(forms.ModelForm):
     class Meta:
         model = Workflow
-        fields = ['name', 'description']
+        fields = ['name', 'description', 'department', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border rounded-lg'}),
+            'description': forms.Textarea(attrs={'class': 'w-full px-3 py-2 border rounded-lg', 'rows': 3}),
+            'department': forms.Select(attrs={'class': 'w-full px-3 py-2 border rounded-lg'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-blue-600'}),
+        }
 
-
-class WorkflowInstanceForm(forms.ModelForm):
+class StepLibraryForm(forms.ModelForm):
     class Meta:
-        model = WorkflowInstance
-        fields = ['workflow', 'initiator']
+        model = StepLibrary
+        fields = ['name', 'description', 'required_role', 'required_permission', 'is_reusable']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border rounded-lg'}),
+            'description': forms.Textarea(attrs={'class': 'w-full px-3 py-2 border rounded-lg', 'rows': 3}),
+            'required_role': forms.Select(attrs={'class': 'w-full px-3 py-2 border rounded-lg'}),
+            'required_permission': forms.Select(attrs={'class': 'w-full px-3 py-2 border rounded-lg'}),
+            'is_reusable': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-blue-600'}),
+        }
+
+class WorkflowStepForm(forms.ModelForm):
+    class Meta:
+        model = WorkflowStep
+        fields = ['name', 'description', 'required_role', 'required_permission']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border rounded-lg'}),
+            'description': forms.Textarea(attrs={'class': 'w-full px-3 py-2 border rounded-lg', 'rows': 3}),
+            'required_role': forms.Select(attrs={'class': 'w-full px-3 py-2 border rounded-lg'}),
+            'required_permission': forms.Select(attrs={'class': 'w-full px-3 py-2 border rounded-lg'}),
+        }
+
+class SubordinateAccessForm(forms.Form):
+    subordinate = forms.ModelChoiceField(
+        queryset=Employee.objects.all(),
+        widget=forms.Select(attrs={'class': 'w-full px-3 py-2 border rounded-lg'})
+    )
+    role = forms.ModelChoiceField(
+        queryset=Role.objects.all(),
+        widget=forms.Select(attrs={'class': 'w-full px-3 py-2 border rounded-lg'})
+    )
+    permissions = forms.ModelMultipleChoiceField(
+        queryset=CustomPermission.objects.all(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-checkbox h-5 w-5 text-blue-600'})
+    )
+
+class EmailSearchForm(forms.Form):
+    search = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'w-full px-3 py-2 border rounded-lg', 'placeholder': 'Search emails...'}))
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'w-full px-3 py-2 border rounded-lg'})
+    )
+    role = forms.ModelChoiceField(
+        queryset=Role.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'w-full px-3 py-2 border rounded-lg'})
+    )
+
+class CustomPasswordResetForm(PasswordResetForm):
+    email = forms.EmailField(
+        max_length=254,
+        widget=forms.EmailInput(attrs={'class': 'w-full px-3 py-2 border rounded-lg', 'placeholder': 'Enter your email'})
+    )
+
+class CustomSetPasswordForm(SetPasswordForm):
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'w-full px-3 py-2 border rounded-lg', 'placeholder': 'Enter new password'})
+    )
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'w-full px-3 py-2 border rounded-lg', 'placeholder': 'Confirm new password'})
+    )
 
 
 class CSVUploadForm(forms.Form):
@@ -270,4 +329,81 @@ class RoleAssignmentForm(forms.ModelForm):
         fields = ['role']
         widgets = {
             'role': forms.Select(choices=Employee.ROLE_CHOICES)
+        }
+
+
+class WorkflowInstanceForm(forms.ModelForm):
+    class Meta:
+        model = WorkflowInstance
+        fields = ['workflow']  # Assuming you want the user to select the workflow to initiate
+
+class WorkflowApprovalForm(forms.ModelForm):
+    class Meta:
+        model = WorkflowApproval
+        fields = ['status', 'comments']
+        
+        
+# forms for trainng and retiremenet
+
+class TrainingForm(forms.ModelForm):
+    class Meta:
+        model = Training
+        fields = ['title', 'description', 'start_date', 'end_date', 'participants']
+        
+class RetirementForm(forms.ModelForm):
+    class Meta:
+        model = Retirement
+        fields = ['employee', 'retirement_date', 'pension_details']
+        
+# forms for Leave and Performance
+
+class LeaveRequestForm(forms.ModelForm):
+    class Meta:
+        model = Leave
+        fields = ['employee', 'type', 'start_date', 'end_date', 'reason']
+        
+class PerformanceForm(forms.ModelForm):
+    class Meta:
+        model = Performance
+        fields = ['employee', 'evaluation_date', 'rating', 'comments']
+        
+class TaskForm(forms.ModelForm):
+    assigned_to = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        widget=forms.SelectMultiple(attrs={'class': 'select2-multiple'}),
+        required=False
+    )
+    deadline = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        input_formats=['%Y-%m-%dT%H:%M']
+    )
+
+    class Meta:
+        model = Task
+        fields = ['title', 'description', 'assigned_to', 'deadline', 'status', 'project']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['assigned_to'].label_from_instance = lambda obj: f"{obj.get_full_name()} ({obj.email})"
+        self.fields['project'].required = False
+        
+        
+class ProjectForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = ['name', 'description', 'start_date', 'end_date', 'status', 'department']
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+class AnnouncementForm(forms.ModelForm):
+    class Meta:
+        model = Announcement
+        fields = ['title', 'content']
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 4}),
         }

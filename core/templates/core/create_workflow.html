@@ -1,0 +1,149 @@
+{% extends 'base_dashboard.html' %}
+{% load tailwind_tags %}
+{% block dashboard_content %}
+<div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-6">{{ title }}</h1>
+
+    <form id="workflow-form" method="post">
+        {% csrf_token %}
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mb-6">
+            <div class="mb-4">
+                <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.name.label }}</label>
+                {{ form.name }}
+            </div>
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.description.label }}</label>
+                {{ form.description }}
+            </div>
+        </div>
+
+        <div id="workflow-builder" class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">Workflow Steps</h2>
+            <div id="workflow-steps" class="mb-4"></div>
+            <button type="button" id="add-step" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                Add Step
+            </button>
+        </div>
+
+        <input type="hidden" name="steps" id="steps-data">
+        <input type="hidden" name="connections" id="connections-data">
+
+        <div class="flex justify-end">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                Save Workflow
+            </button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsPlumb/2.15.6/js/jsplumb.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const workflowSteps = document.getElementById('workflow-steps');
+    const addStepButton = document.getElementById('add-step');
+    const workflowForm = document.getElementById('workflow-form');
+    let stepCounter = 0;
+
+    jsPlumb.ready(function() {
+        const instance = jsPlumb.getInstance({
+            Connector: ["Bezier", { curviness: 50 }],
+            DragOptions: { cursor: "pointer", zIndex: 2000 },
+            PaintStyle: { stroke: "#456" },
+            EndpointStyle: { fill: "#456" },
+            HoverPaintStyle: { stroke: "#dbe300" },
+            EndpointHoverStyle: { fill: "#dbe300" },
+            Container: "workflow-steps"
+        });
+
+        function addStep(stepData = {}) {
+            const stepId = `step-${stepCounter++}`;
+            const stepHtml = `
+                <div id="${stepId}" class="workflow-step bg-gray-100 dark:bg-gray-700 p-4 mb-4 rounded-lg" data-step-id="${stepData.id || ''}">
+                    <input type="text" name="step_name" placeholder="Step Name" value="${stepData.name || ''}" class="mb-2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                    <textarea name="step_description" placeholder="Step Description" rows="2" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">${stepData.description || ''}</textarea>
+                    <select name="step_required_role" class="mt-2 py-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                        <option value="">Select Required Role</option>
+                        {% for role in roles %}
+                            <option value="{{ role.id }}" ${stepData.required_role == {{ role.id }} ? 'selected' : ''}>{{ role.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="step_required_permission" class="mt-2 py-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                        <option value="">Select Required Permission</option>
+                        {% for permission in permissions %}
+                            <option value="{{ permission.id }}" ${stepData.required_permission == {{ permission.id }} ? 'selected' : ''}>{{ permission.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="remove-step mt-2 bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded text-sm">Remove Step</button>
+                </div>
+            `;
+            workflowSteps.insertAdjacentHTML('beforeend', stepHtml);
+
+            instance.draggable(stepId);
+            instance.addEndpoint(stepId, {
+                anchor: "Right",
+                isSource: true,
+                isTarget: false,
+                maxConnections: -1
+            });
+            instance.addEndpoint(stepId, {
+                anchor: "Left",
+                isSource: false,
+                isTarget: true,
+                maxConnections: -1
+            });
+        }
+
+        addStepButton.addEventListener('click', () => addStep());
+
+        workflowSteps.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-step')) {
+                const step = e.target.closest('.workflow-step');
+                instance.remove(step);
+            }
+        });
+
+        workflowForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const steps = Array.from(workflowSteps.querySelectorAll('.workflow-step')).map((step, index) => ({
+                id: step.dataset.stepId,
+                name: step.querySelector('[name="step_name"]').value,
+                description: step.querySelector('[name="step_description"]').value,
+                order: index,
+                required_role: step.querySelector('[name="step_required_role"]').value,
+                required_permission: step.querySelector('[name="step_required_permission"]').value
+            }));
+            
+            const connections = instance.getConnections().map(conn => ({
+                source: conn.sourceId,
+                target: conn.targetId
+            }));
+
+            document.getElementById('steps-data').value = JSON.stringify(steps);
+            document.getElementById('connections-data').value = JSON.stringify(connections);
+            
+            this.submit();
+        });
+
+        // Load existing workflow data if editing
+        {% if workflow %}
+            {% for step in workflow.steps.all %}
+                addStep({
+                    id: {{ step.id }},
+                    name: "{{ step.name }}",
+                    description: "{{ step.description }}",
+                    required_role: {% if step.required_role %}{{ step.required_role.id }}{% else %}null{% endif %},
+                    required_permission: {% if step.required_permission %}{{ step.required_permission.id }}{% else %}null{% endif %}
+                });
+            {% endfor %}
+
+            {% for connection in workflow.workflowconnection_set.all %}
+                instance.connect({
+                    source: "step-{{ connection.source_step.order }}",
+                    target: "step-{{ connection.target_step.order }}"
+                });
+            {% endfor %}
+        {% endif %}
+    });
+});
+</script>
+{% endblock %}

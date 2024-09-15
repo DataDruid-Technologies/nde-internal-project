@@ -40,7 +40,7 @@ class EmployeeManager(BaseUserManager):
 class ActiveEmployeeManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_active=True)
-    
+
 
 class Role(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -70,6 +70,7 @@ class Department(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Zone(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -102,14 +103,14 @@ class LGA(models.Model):
         return f"{self.name}, {self.state.name}"
 
 
-
 class Bank(models.Model):
     code = models.CharField(max_length=100, unique=True)
     name = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
-    
+
+
 class Employee(AbstractUser):
     username = None  # Remove username field
     employee_id = models.CharField(
@@ -159,12 +160,12 @@ class Employee(AbstractUser):
     current_rank = models.CharField(
         max_length=100, blank=True, null=True, verbose_name="Rank")
     EMP_STATUS_CHOICES = [
-        ('Active', 'Active'), 
+        ('Active', 'Active'),
         ('Inactive', 'Inactive'),
         ('On Leave', 'On Leave'),
         ('LOA', 'Leave of Absence'),
-        ('Secondment', 'Secondment'), 
-        ('AWOL', 'Absent Without Leave'), 
+        ('Secondment', 'Secondment'),
+        ('AWOL', 'Absent Without Leave'),
         ('Illness', 'Illness')
     ]
     employment_status = models.CharField(
@@ -183,7 +184,6 @@ class Employee(AbstractUser):
     objects = EmployeeManager()
     history = HistoricalRecords()
     active_objects = ActiveEmployeeManager()
-    
 
     USERNAME_FIELD = 'employee_id'
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'date_joined']
@@ -207,12 +207,10 @@ class Employee(AbstractUser):
                 retired_employee.save()
 
         super().save(*args, **kwargs)
-        
-
 
 
 class Leave(models.Model):
-    emploqyee = models.ForeignKey(
+    employee = models.ForeignKey(
         Employee, on_delete=models.CASCADE, related_name='leaves', verbose_name="Employee")
     start_date = models.DateField(verbose_name="Start Date")
     end_date = models.DateField(verbose_name="End Date")
@@ -223,10 +221,11 @@ class Leave(models.Model):
         ('PL', 'Paternity Leave'),
         ('OL', 'Other Leave')
     ]
-    type = models.CharField(max_length=6,choices=LEAVE_TYPES, default='CL', verbose_name="Leave Type")
+    type = models.CharField(max_length=6, choices=LEAVE_TYPES,
+                            default='CL', verbose_name="Leave Type")
     reason = models.TextField(verbose_name="Reason")
-    
-    
+
+
 class EmployeeDetail(models.Model):
     employee = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='employee_details')
@@ -327,7 +326,46 @@ class EmployeePermission(models.Model):
         return f"{self.employee.get_full_name()} - {self.permission.name}"
 
 
+class StepLibrary(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    required_role = models.ForeignKey(
+        Role, on_delete=models.SET_NULL, null=True, blank=True)
+    required_permission = models.ForeignKey(
+        CustomPermission, on_delete=models.SET_NULL, null=True, blank=True)
+    is_reusable = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        Employee, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "Step libraries"
+
+
+class Workflow(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    department = models.ForeignKey(
+        Department, on_delete=models.CASCADE, related_name='workflows')
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        Employee, on_delete=models.SET_NULL, null=True, related_name='created_workflows')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.department.name}"
+
+
 class WorkflowStep(models.Model):
+    workflow = models.ForeignKey(
+        Workflow, on_delete=models.CASCADE, related_name='steps')
+    library_step = models.ForeignKey(
+        StepLibrary, on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     order = models.PositiveIntegerField()
@@ -336,40 +374,30 @@ class WorkflowStep(models.Model):
     required_permission = models.ForeignKey(
         CustomPermission, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.workflow.name} - {self.name}"
+
     class Meta:
         ordering = ['order']
 
-    def __str__(self):
-        return self.name
 
-
-class Workflow(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
-    steps = models.ManyToManyField(WorkflowStep, through='WorkflowStepOrder', related_name='workflows')
-    current_step = models.ForeignKey(WorkflowStep, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_workflows')
-
-    def __str__(self):
-        return self.name
-    
-
-class WorkflowStepOrder(models.Model):
-    workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
-    step = models.ForeignKey(WorkflowStep, on_delete=models.CASCADE)
-    order = models.PositiveIntegerField()
-
-    class Meta:
-        ordering = ['order']
-        unique_together = ('workflow', 'step')
+class WorkflowConnection(models.Model):
+    workflow = models.ForeignKey(
+        Workflow, on_delete=models.CASCADE, related_name='connections')
+    source_step = models.ForeignKey(
+        WorkflowStep, on_delete=models.CASCADE, related_name='outgoing_connections')
+    target_step = models.ForeignKey(
+        WorkflowStep, on_delete=models.CASCADE, related_name='incoming_connections')
 
     def __str__(self):
-        return f"{self.workflow.name} - {self.step.name} (Order: {self.order})"
+        return f"{self.source_step.name} -> {self.target_step.name}"
 
 
 class WorkflowInstance(models.Model):
-    workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
+    workflow = models.ForeignKey(
+        Workflow, on_delete=models.CASCADE, related_name='instances')
     current_step = models.ForeignKey(
-        WorkflowStep, on_delete=models.SET_NULL, null=True)
+        WorkflowStep, on_delete=models.SET_NULL, null=True, related_name='current_instances')
     initiator = models.ForeignKey(
         Employee, on_delete=models.CASCADE, related_name='initiated_workflows')
     status = models.CharField(max_length=20, choices=[
@@ -400,6 +428,17 @@ class WorkflowApproval(models.Model):
 
     def __str__(self):
         return f"{self.workflow_instance} - {self.step.name} - {self.approver.get_full_name()} ({self.status})"
+
+
+class WorkflowConnection(models.Model):
+    workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
+    source_step = models.ForeignKey(
+        WorkflowStep, on_delete=models.CASCADE, related_name='outgoing_connections')
+    target_step = models.ForeignKey(
+        WorkflowStep, on_delete=models.CASCADE, related_name='incoming_connections')
+
+    def __str__(self):
+        return f"{self.source_step.name} -> {self.target_step.name}"
 
 
 class RetiredEmployee(models.Model):
@@ -461,22 +500,25 @@ class Project(models.Model):
 
 
 class Task(models.Model):
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, related_name='tasks')
-    assigned_to = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='assigned_tasks')
-    due_date = models.DateField(db_index=True)
-    STATUS_CHOICES=[
+    STATUS_CHOICES = [
         ('PENDING', 'Pending'),
         ('IN_PROGRESS', 'In Progress'),
         ('COMPLETED', 'Completed'),
-        ('OVERDUE', 'Overdue')
     ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, db_index=True)
+
+    title = models.CharField(max_length=200)
+    description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    deadline = models.DateTimeField()  # Changed from due_date to deadline
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    assigned_to = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name='assigned_tasks')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                   null=True, blank=True, related_name='created_tasks')
+    project = models.ForeignKey(
+        'Project', on_delete=models.CASCADE, related_name='tasks', null=True, blank=True)
 
     def __str__(self):
         return self.title
@@ -576,9 +618,6 @@ class UserProfile(models.Model):
         return f'{self.user.get_full_name()} Profile'
 
 
-from django.db import models
-from django.contrib.auth.models import User
-
 class Performance(models.Model):
     RATING_CHOICES = [
         (1, 'Poor'),
@@ -587,10 +626,12 @@ class Performance(models.Model):
         (4, 'Good'),
         (5, 'Excellent'),
     ]
-    employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    employee = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     evaluation_date = models.DateField()
     rating = models.IntegerField(choices=RATING_CHOICES)
     comments = models.TextField()
+
 
 class Training(models.Model):
     title = models.CharField(max_length=200)
@@ -599,8 +640,10 @@ class Training(models.Model):
     end_date = models.DateField()
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL)
 
+
 class Retirement(models.Model):
-    employee = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    employee = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     retirement_date = models.DateField()
     reason = models.CharField(max_length=200)
     pension_details = models.TextField()

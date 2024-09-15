@@ -1,0 +1,81 @@
+{% extends 'base_dashboard.html' %}
+{% load humanize %}
+
+{% block dashboard_content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ department.name }}</h1>
+        <a href="{% url 'department_update' department.pk %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+            Edit Department
+        </a>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Department Information</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">{{ department.description }}</p>
+        </div>
+        <div class="border-t border-gray-200 dark:border-gray-700 px-4 py-5 sm:p-0">
+            <dl class="sm:divide-y sm:divide-gray-200 dark:sm:divide-gray-700">
+                <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Number of Employees</dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">{{ employees.count }}</dd>
+                </div>
+                <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Number of Projects</dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">{{ projects.count }}</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Employees</h3>
+        </div>
+        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+            {% for employee in employees %}
+            <li class="px-4 py-4 sm:px-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                        <img class="h-10 w-10 rounded-full" src="{{ employee.profile_picture.url }}" alt="">
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ employee.get_full_name }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ employee.email }}</div>
+                    </div>
+                </div>
+            </li>
+            {% empty %}
+            <li class="px-4 py-4 sm:px-6 text-sm text-gray-500 dark:text-gray-400">No employees in this department.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Projects</h3>
+        </div>
+        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+            {% for project in projects %}
+            <li class="px-4 py-4 sm:px-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ project.name }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ project.description|truncatechars:100 }}</div>
+                    </div>
+                    <div class="ml-2 flex-shrink-0 flex">
+                        <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {% if project.status == 'COMPLETED' %}bg-green-100 text-green-800{% elif project.status == 'IN_PROGRESS' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ project.get_status_display }}
+                        </p>
+                    </div>
+                </div>
+            </li>
+            {% empty %}
+            <li class="px-4 py-4 sm:px-6 text-sm text-gray-500 dark:text-gray-400">No projects in this department.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

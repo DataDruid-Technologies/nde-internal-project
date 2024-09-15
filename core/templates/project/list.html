@@ -1,0 +1,51 @@
+{% extends 'base_dashboard.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Projects</h1>
+        <a href="{% url 'project_create' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+            Create Project
+        </a>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+            {% for project in projects %}
+            <li>
+                <a href="{% url 'project_detail' project.pk %}" class="block hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <div class="px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">
+                                {{ project.name }}
+                            </p>
+                            <div class="ml-2 flex-shrink-0 flex">
+                                <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if project.status == 'COMPLETED' %}bg-green-100 text-green-800{% elif project.status == 'IN_PROGRESS' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ project.get_status_display }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-2 sm:flex sm:justify-between">
+                            <div class="sm:flex">
+                                <p class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                    {{ project.description|truncatechars:100 }}
+                                </p>
+                            </div>
+                            <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0">
+                                <p>
+                                    Due {{ project.end_date|naturalday }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+            {% empty %}
+            <li class="px-4 py-4 sm:px-6 text-sm text-gray-500 dark:text-gray-400">No projects found.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

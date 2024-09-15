@@ -40,9 +40,14 @@ module.exports = {
          * and make sure the pattern below matches your project structure.
          */
         // '../../**/*.py'
+        './core/**/*.py',
     ],
+    darkMode: 'class', // This enables the dark mode variant
     theme: {
-        extend: {},
+      extend: {},
+    },
+    variants: {
+      extend: {},
     },
     plugins: [
         /**

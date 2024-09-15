@@ -1,15 +1,18 @@
 import csv
+import json
 import chardet
 import dateutil.parser
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, login_not_required, user_passes_test
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 from django.contrib import messages
+from django.http import HttpResponseForbidden
 from .forms import *
 from .models import *
 # views.py
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum, Max
 from django.utils import timezone
 from django.db import transaction
 
@@ -18,11 +21,9 @@ from .utilis import *
 from import_export.formats import base_formats
 from .resources import *
 from tablib import Dataset
-
-from django.views.generic import ListView, DetailView, CreateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-
+from django.core.paginator import Paginator
+from datetime import date, timedelta
 
 # Assuming you have these models
 
@@ -53,55 +54,103 @@ def custom_logout(request):
     return redirect('login')
 
 
-from django.views.generic import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
+@login_required
+def dashboard(request):
+    user = request.user
+    today = timezone.now().date()
+    thirty_days_ago = today - timedelta(days=30)
 
+    context = {
+        'user_role': user.role,
+        'user_department': user.department,
+    }
 
-class DashboardView(LoginRequiredMixin, TemplateView):
-    template_name = 'dashboards/dashboard.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-
-        # Common context data
-        context['total_employees'] = Employee.objects.count()
-        context['total_departments'] = Department.objects.count()
-        context['active_projects'] = Project.objects.filter(status='ACTIVE').count()
-        context['pending_tasks'] = Task.objects.filter(status='PENDING').count()
-        context['recent_announcements'] = Announcement.objects.order_by('-created_at')[:5]
-
-        # Role-specific context data
+    if user.role in ['DG', 'HOD', 'ADMIN']:
         if user.role == 'DG':
-            context['department_stats'] = Department.objects.annotate(employee_count=models.Count('employees'))[:5]
-            context['recent_hires'] = Employee.objects.order_by('-date_joined')[:5]
-        elif user.role in ['DIR', 'ZD']:
-            context['managed_departments'] = Department.objects.filter(employees__role__in=['DIR', 'ZD'])
-            context['department_projects'] = Project.objects.filter(department__employees__role__in=['DIR', 'ZD']).order_by('-start_date')[:5]
-        elif user.role in ['HOD', 'HOU']:
-            context['department'] = user.department
-            context['department_employees'] = user.department.employees.count()
-            context['department_projects'] = Project.objects.filter(department=user.department).order_by('-start_date')[:5]
-        else:  # Regular staff and IT Admin
-            context['my_tasks'] = Task.objects.filter(assigned_to=user).order_by('due_date')[:5]
-            context['my_projects'] = Project.objects.filter(team_members=user).order_by('-start_date')[:5]
+            employees = Employee.objects.all()
+            projects = Project.objects.all()
+            departments = Department.objects.all()
+        elif user.role == 'HOD':
+            employees = Employee.objects.filter(department=user.department)
+            projects = Project.objects.filter(department=user.department)
+            departments = Department.objects.filter(id=user.department.id)
+        else:  # ADMIN
+            employees = Employee.objects.all()
+            projects = Project.objects.all()
+            departments = Department.objects.all()
 
-        return context
-    
+        context.update({
+            'total_employees': employees.count(),
+            'total_departments': departments.count(),
+            'total_projects': projects.count(),
+            'new_employees': employees.filter(date_joined__gte=thirty_days_ago).count(),
+            'active_projects': projects.filter(status='ACTIVE').count(),
+            'completed_projects': projects.filter(status='COMPLETED').count(),
+            'recent_employees': employees.order_by('-date_joined')[:5],
+            'recent_projects': projects.order_by('-start_date')[:5],
+        })
+    else:  # Regular staff
+        context.update({
+            'my_tasks': Task.objects.filter(assigned_to=user).order_by('deadline')[:5],
+            'my_projects': Project.objects.filter(team_members=user).order_by('-start_date')[:5],
+        })
+
+    # Common for all roles
+    context.update({
+        'recent_announcements': Announcement.objects.order_by('-created_at')[:5],
+        'my_tasks_count': Task.objects.filter(assigned_to=user).count(),
+        'my_overdue_tasks_count': Task.objects.filter(assigned_to=user, deadline__lt=today, status__in=['PENDING', 'IN_PROGRESS']).count(),
+    })
+
+    return render(request, 'dashboards/dashboard.html', context)
+
+
 
 @login_required
-def chat_view(request):
-    chats = ChatMessage.objects.filter(Q(sender=request.user) | Q(recipient=request.user)).order_by('-timestamp')
-    return render(request, 'core/chat.html', {'chats': chats})
+def task_dashboard(request):
+    user = request.user
+    today = timezone.now().date()
+    thirty_days_ago = today - timedelta(days=30)
 
+    context = {
+        # Task statistics
+        'total_tasks': Task.objects.count(),
+        'my_tasks': Task.objects.filter(assigned_to=user).count(),
+        'overdue_tasks': Task.objects.filter(deadline__lt=timezone.now(), status__in=['PENDING', 'IN_PROGRESS']).count(),
+        'completed_tasks': Task.objects.filter(status='COMPLETED', updated_at__gte=thirty_days_ago).count(),
 
-from django.core.paginator import Paginator
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib import messages
-from .models import Employee, EmployeeDetail, Department, Leave
-from .forms import EmployeeForm, EmployeeDetailForm
-from datetime import date, timedelta
+        # Project statistics
+        'total_projects': Project.objects.count(),
+        'active_projects': Project.objects.filter(status='ACTIVE').count(),
+
+        # Employee statistics
+        'total_employees': Employee.objects.count(),
+        'new_employees': Employee.objects.filter(date_joined__gte=thirty_days_ago).count(),
+
+        # Recent items
+        'recent_tasks': Task.objects.filter(Q(assigned_to=user) | Q(created_by=user)).order_by('-created_at')[:5],
+        'recent_projects': Project.objects.order_by('-start_date')[:5],
+        'recent_announcements': Announcement.objects.order_by('-created_at')[:5],
+
+        # Task distribution
+        'task_status_distribution': Task.objects.values('status').annotate(count=Count('id')),
+        'my_task_status_distribution': Task.objects.filter(assigned_to=user).values('status').annotate(count=Count('id')),
+
+        # Timeline of tasks due this week
+        'this_week_tasks': Task.objects.filter(
+            deadline__gte=today,
+            deadline__lt=today + timedelta(days=7)
+        ).order_by('deadline'),
+    }
+
+    if user.role in ['DG', 'DIR', 'ZD', 'HOD']:
+        context.update({
+            'department_task_counts': Task.objects.values('project__department__name').annotate(count=Count('id')),
+            'top_task_creators': Employee.objects.annotate(task_count=Count('created_tasks')).order_by('-task_count')[:5],
+        })
+
+    return render(request, 'dashboards/tasks_dashboard.html', context)
+
 
 @login_required
 @user_passes_test(lambda u: u.role in ['DG', 'DIR', 'ZD', 'HOD', 'SD'])
@@ -237,70 +286,134 @@ def profile(request):
 def is_authorized(user):
     return Employee.role in ['DG', 'DIR', 'ZD', 'HOD', 'HOU', 'IT_ADMIN']
 
-@login_required
-@user_passes_test(is_authorized)
-def workflow_step_list(request):
-    steps = WorkflowStep.objects.all()
-    return render(request, 'workflow/step_list.html', {'steps': steps})
 
 @login_required
-@user_passes_test(is_authorized)
-def workflow_step_create(request):
-    if request.method == 'POST':
-        form = WorkflowStepForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Workflow step created successfully.')
-            return redirect('workflow_step_list')
-    else:
-        form = WorkflowStepForm()
-    return render(request, 'workflow/step_form.html', {'form': form})
-
-@login_required
-@user_passes_test(is_authorized)
 def workflow_list(request):
-    workflows = Workflow.objects.all()
-    return render(request, 'workflow/list.html', {'workflows': workflows})
+    workflows = Workflow.objects.filter(department=request.user.department)
+    return render(request, 'core/workflow_list.html', {'workflows': workflows})
 
 @login_required
-@user_passes_test(is_authorized)
+def workflow_detail(request, pk):
+    workflow = get_object_or_404(Workflow, pk=pk)
+    steps = workflow.steps.all().order_by('order')
+    return render(request, 'core/workflow_detail.html', {'workflow': workflow, 'steps': steps})
+
+@login_required
 def workflow_create(request):
     if request.method == 'POST':
         form = WorkflowForm(request.POST)
         if form.is_valid():
-            workflow = form.save()
+            workflow = form.save(commit=False)
+            workflow.created_by = request.user
+            workflow.save()
             messages.success(request, 'Workflow created successfully.')
             return redirect('workflow_detail', pk=workflow.pk)
     else:
         form = WorkflowForm()
-    return render(request, 'workflow/form.html', {'form': form})
+    return render(request, 'core/create_workflow.html', {'form': form})
 
 @login_required
-@user_passes_test(is_authorized)
-def workflow_detail(request, pk):
+def workflow_update(request, pk):
     workflow = get_object_or_404(Workflow, pk=pk)
-    return render(request, 'workflow/detail.html', {'workflow': workflow})
-
-@login_required
-@user_passes_test(is_authorized)
-def workflow_instance_create(request):
     if request.method == 'POST':
-        form = WorkflowInstanceForm(request.POST)
+        form = WorkflowForm(request.POST, instance=workflow)
         if form.is_valid():
-            instance = form.save(commit=False)
-            instance.current_step = instance.workflow.steps.first()
-            instance.save()
-            messages.success(request, 'Workflow instance created successfully.')
-            return redirect('workflow_instance_detail', pk=instance.pk)
+            form.save()
+            messages.success(request, 'Workflow updated successfully.')
+            return redirect('workflow_detail', pk=workflow.pk)
     else:
-        form = WorkflowInstanceForm()
-    return render(request, 'workflow/instance_form.html', {'form': form})
+        form = WorkflowForm(instance=workflow)
+    return render(request, 'core/upadte_workflow.html', {'form': form, 'workflow': workflow})
 
 @login_required
-@user_passes_test(is_authorized)
-def workflow_instance_detail(request, pk):
-    instance = get_object_or_404(WorkflowInstance, pk=pk)
-    return render(request, 'workflow/instance_detail.html', {'instance': instance})
+def step_library_list(request):
+    steps = StepLibrary.objects.all()
+    return render(request, 'core/step_library_list.html', {'steps': steps})
+
+@login_required
+def step_library_create(request):
+    if request.method == 'POST':
+        form = StepLibraryForm(request.POST)
+        if form.is_valid():
+            step = form.save(commit=False)
+            step.created_by = request.user
+            step.save()
+            messages.success(request, 'Step added to library successfully.')
+            return redirect('step_library_list')
+    else:
+        form = StepLibraryForm()
+    return render(request, 'core/step_library_form.html', {'form': form})
+
+@login_required
+def subordinate_access_management(request):
+    if request.method == 'POST':
+        form = SubordinateAccessForm(request.POST)
+        if form.is_valid():
+            subordinate = form.cleaned_data['subordinate']
+            role = form.cleaned_data['role']
+            permissions = form.cleaned_data['permissions']
+            subordinate.role = role
+            subordinate.user_permissions.set(permissions)
+            subordinate.save()
+            messages.success(request, f'Access updated for {subordinate.get_full_name()}')
+            return redirect('subordinate_access_management')
+    else:
+        form = SubordinateAccessForm()
+    
+    subordinates = Employee.objects.filter(department=request.user.department).exclude(pk=request.user.pk)
+    return render(request, 'core/subordinate_access_management.html', {'form': form, 'subordinates': subordinates})
+
+@login_required
+def email_list(request):
+    form = EmailSearchForm(request.GET)
+    employees = Employee.objects.all()
+
+    if form.is_valid():
+        search = form.cleaned_data.get('search')
+        department = form.cleaned_data.get('department')
+        role = form.cleaned_data.get('role')
+
+        if search:
+            employees = employees.filter(
+                Q(email__icontains=search) |
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search)
+            )
+        if department:
+            employees = employees.filter(department=department)
+        if role:
+            employees = employees.filter(role=role)
+
+    paginator = Paginator(employees, 20)  # Show 20 employees per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'email_list.html', {'form': form, 'page_obj': page_obj})
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'password_reset_form.html'
+    email_template_name = 'password_reset_email.html'
+    subject_template_name = 'password_reset_subject.txt'
+    form_class = CustomPasswordResetForm
+    success_url = reverse_lazy('password_reset_done')
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'password_reset_confirm.html'
+    form_class = CustomSetPasswordForm
+    success_url = reverse_lazy('password_reset_complete')
+
+def test_email(request):
+    subject = 'Test Email'
+    message = 'This is a test email from your Django application.'
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = ['recipient@example.com']
+    
+    try:
+        send_mail(subject, message, from_email, recipient_list)
+        return render(request, 'email_test_success.html')
+    except Exception as e:
+        return render(request, 'email_test_failure.html', {'error': str(e)})
+    
 
 @login_required
 @user_passes_test(lambda u: u.is_authorised())
@@ -370,16 +483,108 @@ def settings(request):
         form = UserProfileForm(instance=profile)
     return render(request, 'settings.html', {'form': form})
 
-@login_required
-def chat_list(request):
-    chats = ChatMessage.objects.filter(Q(sender=request.user) | Q(recipient=request.user)).order_by('-timestamp')
-    distinct_fields = ['sender', 'recipient']
-    chat_messages = ChatMessage.objects.filter(Q(sender__in=distinct_fields) | Q(recipient__in=distinct_fields)).order_by('-timestamp')
-    return render(request, 'core/chat_list.html', {'chats': chats_messages})
 
 @login_required
-def chat_detail(request, user_id):
-    other_user = User.objects.get(id=user_id)
+def inbox(request):
+    messages = InboxMessage.objects.filter(recipient=request.user).order_by('-timestamp')
+    query = request.GET.get('q')
+    if query:
+        messages = messages.filter(
+            Q(subject__icontains=query) | 
+            Q(content__icontains=query) |
+            Q(sender__first_name__icontains=query) |
+            Q(sender__last_name__icontains=query)
+        )
+    
+    paginator = Paginator(messages, 20)  # Show 20 messages per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'query': query,
+    }
+    return render(request, 'messaging/inbox.html', context)
+
+@login_required
+def sent_messages(request):
+    messages = InboxMessage.objects.filter(sender=request.user).order_by('-timestamp')
+    query = request.GET.get('q')
+    if query:
+        messages = messages.filter(
+            Q(subject__icontains=query) | 
+            Q(content__icontains=query) |
+            Q(recipient__first_name__icontains=query) |
+            Q(recipient__last_name__icontains=query)
+        )
+    
+    paginator = Paginator(messages, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'query': query,
+    }
+    return render(request, 'messaging/sent_messages.html', context)
+
+@login_required
+def compose_message(request):
+    if request.method == 'POST':
+        form = InboxMessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.sender = request.user
+            message.save()
+            return redirect('inbox')
+    else:
+        form = InboxMessageForm()
+    return render(request, 'messaging/compose_message.html', {'form': form})
+
+@login_required
+def message_detail(request, message_id):
+    message = get_object_or_404(InboxMessage, id=message_id, recipient=request.user)
+    if not message.is_read:
+        message.is_read = True
+        message.save()
+    return render(request, 'messaging/message_detail.html', {'message': message})
+
+@login_required
+def delete_message(request, message_id):
+    message = get_object_or_404(InboxMessage, id=message_id, recipient=request.user)
+    if request.method == 'POST':
+        message.delete()
+        return redirect('inbox')
+    return render(request, 'messaging/delete_message.html', {'message': message})
+
+@login_required
+def chat_list(request):
+    # Get all conversations involving the current user
+    conversations = ChatMessage.objects.filter(
+        Q(sender=request.user) | Q(recipient=request.user)
+    ).values('sender', 'recipient').annotate(
+        last_message_time=Max('timestamp')
+    ).order_by('-last_message_time')
+
+    # Process the conversations to get the other user and the last message
+    chat_list = []
+    for conv in conversations:
+        other_user = conv['recipient'] if conv['sender'] == request.user.id else conv['sender']
+        last_message = ChatMessage.objects.filter(
+            Q(sender_id=conv['sender'], recipient_id=conv['recipient']) |
+            Q(sender_id=conv['recipient'], recipient_id=conv['sender'])
+        ).latest('timestamp')
+
+        chat_list.append({
+            'other_user': other_user,
+            'last_message': last_message,
+        })
+
+    return render(request, 'messaging/chat_list.html', {'chats': chat_list})
+
+@login_required
+def chat_detail(request, other_user_id):
+    other_user = get_object_or_404(Employee, id=other_user_id)
     messages = ChatMessage.objects.filter(
         (Q(sender=request.user) & Q(recipient=other_user)) |
         (Q(sender=other_user) & Q(recipient=request.user))
@@ -392,45 +597,23 @@ def chat_detail(request, user_id):
             message.sender = request.user
             message.recipient = other_user
             message.save()
-            return redirect('chat_detail', user_id=user_id)
-    else:
-        form = ChatMessageForm()
+            return JsonResponse({
+                'status': 'success',
+                'message': {
+                    'content': message.content,
+                    'timestamp': message.timestamp.isoformat(),
+                    'sender_id': message.sender.id
+                }
+            })
+        else:
+            return JsonResponse({'status': 'error', 'errors': form.errors})
     
-    return render(request, 'core/chat_detail.html', {
-        'messages': messages,
+    form = ChatMessageForm()
+    return render(request, 'messaging/chat_detail.html', {
         'other_user': other_user,
+        'messages': messages,
         'form': form
     })
-
-
-from django.http import JsonResponse
-from .models import ChatMessage
-
-@login_required
-def chat_list(request):
-    chats = ChatMessage.objects.filter(
-        Q(sender=request.user) | Q(recipient=request.user)
-    ).order_by('-timestamp').distinct('sender', 'recipient')
-    return render(request, 'messaging/chat_list.html', {'chats': chats})
-
-@login_required
-def chat_detail(request, other_user_id):
-    other_user = get_object_or_404(Employee, id=other_user_id)
-    messages = ChatMessage.objects.filter(
-        (Q(sender=request.user) & Q(recipient=other_user)) |
-        (Q(sender=other_user) & Q(recipient=request.user))
-    ).order_by('timestamp')
-    return render(request, 'messaging/chat_detail.html', {'messages': messages, 'other_user': other_user})
-
-@login_required
-def send_chat_message(request):
-    if request.method == 'POST':
-        recipient_id = request.POST.get('recipient_id')
-        content = request.POST.get('content')
-        recipient = get_object_or_404(Employee, id=recipient_id)
-        message = ChatMessage.objects.create(sender=request.user, recipient=recipient, content=content)
-        return JsonResponse({'status': 'success', 'message': message.content, 'timestamp': message.timestamp})
-    return JsonResponse({'status': 'error'}, status=400)
 
 @login_required
 def get_new_messages(request, other_user_id, last_message_id):
@@ -440,68 +623,49 @@ def get_new_messages(request, other_user_id, last_message_id):
         (Q(sender=other_user) & Q(recipient=request.user)),
         id__gt=last_message_id
     ).order_by('timestamp')
-    messages_data = [{'content': msg.content, 'sender': msg.sender.id, 'timestamp': msg.timestamp} for msg in new_messages]
+    
+    messages_data = [{
+        'id': msg.id,
+        'content': msg.content,
+        'sender_id': msg.sender.id,
+        'timestamp': msg.timestamp.isoformat()
+    } for msg in new_messages]
+    
     return JsonResponse({'messages': messages_data})
 
-
-from django.db.models import Q
-from .models import InboxMessage
-
 @login_required
-def inbox(request):
-    messages = InboxMessage.objects.filter(recipient=request.user).order_by('-timestamp')
-    paginator = Paginator(messages, 15)  # Show 15 messages per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'messaging/inbox.html', {'page_obj': page_obj})
-
-@login_required
-def sent_messages(request):
-    messages = InboxMessage.objects.filter(sender=request.user).order_by('-timestamp')
-    paginator = Paginator(messages, 15)  # Show 15 messages per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'messaging/sent_messages.html', {'page_obj': page_obj})
-
-@login_required
-def compose_message(request):
-    if request.method == 'POST':
-        form = InboxMessageForm(request.POST)
-        if form.is_valid():
-            message = form.save(commit=False)
-            message.sender = request.user
-            message.save()
-            messages.success(request, 'Message sent successfully.')
-            return redirect('inbox')
-    else:
-        form = InboxMessageForm()
-    return render(request, 'messaging/compose_message.html', {'form': form})
-
-@login_required
-def message_detail(request, message_id):
-    message = get_object_or_404(InboxMessage, id=message_id)
-    if message.recipient == request.user and not message.is_read:
-        message.is_read = True
-        message.save()
-    return render(request, 'messaging/message_detail.html', {'message': message})
-
-@login_required
-def search_messages(request):
-    query = request.GET.get('q')
-    if query:
-        messages = InboxMessage.objects.filter(
-            Q(recipient=request.user) | Q(sender=request.user)
-        ).filter(
-            Q(subject__icontains=query) | Q(content__icontains=query)
-        ).order_by('-timestamp')
-    else:
-        messages = InboxMessage.objects.none()
+def chat_popup(request, other_user_id):
+    other_user = get_object_or_404(Employee, id=other_user_id)
+    messages = ChatMessage.objects.filter(
+        (Q(sender=request.user) & Q(recipient=other_user)) |
+        (Q(sender=other_user) & Q(recipient=request.user))
+    ).order_by('-timestamp')[:20]  # Get last 20 messages
     
-    paginator = Paginator(messages, 15)  # Show 15 messages per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'messaging/search_results.html', {'page_obj': page_obj, 'query': query})
+    form = ChatMessageForm()
+    return render(request, 'messaging/chat_popup.html', {
+        'other_user': other_user,
+        'other_user': other_user,
+        'messages': reversed(messages),  # Reverse to show oldest first
+        'form': form
+    })
 
+@login_required
+def update_chat_status(request):
+    if request.method == 'POST':
+        chat_id = request.POST.get('chat_id')
+        is_open = request.POST.get('is_open') == 'true'
+        
+        # Update the chat status in the database
+        # This is a placeholder - you'll need to implement the actual logic
+        # based on how you're storing chat status
+        
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def get_unread_count(request):
+    unread_count = ChatMessage.objects.filter(recipient=request.user, is_read=False).count()
+    return JsonResponse({'unread_count': unread_count})
 
 
 @login_required
@@ -808,3 +972,399 @@ def convert_date(date_str):
     else:
         return None
     
+
+
+@login_required
+def workflow_list(request):
+    workflows = Workflow.objects.all()
+    return render(request, 'core/workflow_list.html', {'workflows': workflows})
+
+@login_required
+def create_or_update_workflow(request, workflow_id=None):
+    if workflow_id:
+        workflow = get_object_or_404(Workflow, id=workflow_id)
+        title = "Edit Workflow"
+    else:
+        workflow = None
+        title = "Create Workflow"
+
+    if request.method == 'POST':
+        form = WorkflowForm(request.POST, instance=workflow)
+        if form.is_valid():
+            with transaction.atomic():
+                workflow = form.save()
+                
+                steps_data = json.loads(request.POST.get('steps', '[]'))
+                connections_data = json.loads(request.POST.get('connections', '[]'))
+                
+                WorkflowStepOrder.objects.filter(workflow=workflow).delete()
+                WorkflowConnection.objects.filter(workflow=workflow).delete()
+                
+                steps = {}
+                for index, step_data in enumerate(steps_data):
+                    step, created = WorkflowStep.objects.update_or_create(
+                        id=step_data.get('id'),
+                        defaults={
+                            'name': step_data['name'],
+                            'description': step_data.get('description', ''),
+                            'order': index,
+                            'required_role_id': step_data.get('required_role') or None,
+                            'required_permission_id': step_data.get('required_permission') or None,
+                        }
+                    )
+                    WorkflowStepOrder.objects.create(
+                        workflow=workflow,
+                        step=step,
+                        order=index
+                    )
+                    steps[step_data['id']] = step
+                
+                for connection in connections_data:
+                    source_step = steps[connection['source']]
+                    target_step = steps[connection['target']]
+                    WorkflowConnection.objects.create(
+                        workflow=workflow,
+                        source_step=source_step,
+                        target_step=target_step
+                    )
+                
+                messages.success(request, f"Workflow '{workflow.name}' {'updated' if workflow_id else 'created'} successfully.")
+            return redirect('workflow_detail', pk=workflow.id)
+    else:
+        form = WorkflowForm(instance=workflow)
+
+    context = {
+        'form': form,
+        'workflow': workflow,
+        'title': title,
+        'roles': Role.objects.all(),
+        'permissions': CustomPermission.objects.all(),
+    }
+    return render(request, 'core/create_or_update_workflow.html', context)
+
+
+@login_required
+def update_workflow(request, workflow_id):
+    workflow = get_object_or_404(Workflow, id=workflow_id)
+    if request.method == 'POST':
+        form = WorkflowForm(request.POST, instance=workflow)
+        if form.is_valid():
+            with transaction.atomic():
+                workflow = form.save()
+                
+                steps_data = json.loads(request.POST.get('steps', '[]'))
+                connections_data = json.loads(request.POST.get('connections', '[]'))
+                
+                # Clear existing steps and connections
+                WorkflowStepOrder.objects.filter(workflow=workflow).delete()
+                WorkflowConnection.objects.filter(workflow=workflow).delete()
+                
+                steps = {}
+                for index, step_data in enumerate(steps_data):
+                    step_id = step_data['id']
+                    if step_id.startswith('new-step-'):
+                        # This is a new step
+                        step = WorkflowStep.objects.create(
+                            name=step_data['name'],
+                            description=step_data.get('description', ''),
+                            order=index,
+                            required_role_id=step_data.get('required_role') or None,
+                            required_permission_id=step_data.get('required_permission') or None,
+                        )
+                    else:
+                        # This is an existing step
+                        step = WorkflowStep.objects.get(id=int(step_id))
+                        step.name = step_data['name']
+                        step.description = step_data.get('description', '')
+                        step.order = index
+                        step.required_role_id = step_data.get('required_role') or None
+                        step.required_permission_id = step_data.get('required_permission') or None
+                        step.save()
+
+                    WorkflowStepOrder.objects.create(
+                        workflow=workflow,
+                        step=step,
+                        order=index
+                    )
+                    steps[step_id] = step
+                
+                # Create connections
+                for connection in connections_data:
+                    source_step = steps[connection['source']]
+                    target_step = steps[connection['target']]
+                    WorkflowConnection.objects.create(
+                        workflow=workflow,
+                        source_step=source_step,
+                        target_step=target_step
+                    )
+                
+                messages.success(request, f"Workflow '{workflow.name}' updated successfully.")
+            return redirect('workflow_detail', pk=workflow.id)
+    else:
+        form = WorkflowForm(instance=workflow)
+
+    context = {
+        'form': form,
+        'workflow': workflow,
+        'roles': Role.objects.all(),
+        'permissions': CustomPermission.objects.all(),
+    }
+    return render(request, 'core/update_workflow.html', context)
+
+@login_required
+def workflow_detail(request, pk):
+    workflow = get_object_or_404(Workflow, pk=pk)
+    steps = workflow.steps.all().order_by('workflowsteporder__order')
+    connections = workflow.workflowconnection_set.all()
+    
+    context = {
+        'workflow': workflow,
+        'steps': steps,
+        'connections': connections,
+    }
+    return render(request, 'core/workflow_detail.html', context)
+
+@login_required
+def delete_workflow(request, pk):
+    workflow = get_object_or_404(Workflow, pk=pk)
+    if request.method == 'POST':
+        workflow.delete()
+        messages.success(request, f"Workflow '{workflow.name}' deleted successfully.")
+        return redirect('workflow_list')
+    return render(request, 'core/delete_workflow.html', {'workflow': workflow})
+
+
+@login_required
+def dashboard_search(request):
+    query = request.GET.get('q')
+    results = {
+        'employees': [],
+        'departments': [],
+        'projects': [],
+        'tasks': []
+    }
+    
+    if query:
+        results['employees'] = Employee.objects.filter(
+            Q(first_name__icontains=query) | 
+            Q(last_name__icontains=query) |
+            Q(employee_id__icontains=query)
+        )[:5]
+        
+        results['departments'] = Department.objects.filter(name__icontains=query)[:5]
+        
+        results['projects'] = Project.objects.filter(
+            Q(name__icontains=query) | 
+            Q(description__icontains=query)
+        )[:5]
+        
+        results['tasks'] = Task.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)
+        )[:5]
+    
+    return render(request, 'dashboard/search_results.html', {'results': results, 'query': query})
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Count
+from .models import Department, Project, Task, Announcement, Notification
+from .forms import DepartmentForm, ProjectForm, TaskForm, AnnouncementForm
+
+@login_required
+def department_list(request):
+    departments = Department.objects.annotate(employee_count=Count('employees'))
+    return render(request, 'department/list.html', {'departments': departments})
+
+@login_required
+def department_detail(request, pk):
+    department = get_object_or_404(Department, pk=pk)
+    employees = department.employees.all()
+    projects = Project.objects.filter(department=department)
+    return render(request, 'department/detail.html', {
+        'department': department,
+        'employees': employees,
+        'projects': projects
+    })
+
+@login_required
+def department_create(request):
+    if request.method == 'POST':
+        form = DepartmentForm(request.POST)
+        if form.is_valid():
+            department = form.save()
+            messages.success(request, 'Department created successfully.')
+            return redirect('department_detail', pk=department.pk)
+    else:
+        form = DepartmentForm()
+    return render(request, 'department/form.html', {'form': form})
+
+@login_required
+def department_update(request, pk):
+    department = get_object_or_404(Department, pk=pk)
+    if request.method == 'POST':
+        form = DepartmentForm(request.POST, instance=department)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Department updated successfully.')
+            return redirect('department_detail', pk=department.pk)
+    else:
+        form = DepartmentForm(instance=department)
+    return render(request, 'department/form.html', {'form': form, 'department': department})
+
+@login_required
+def project_list(request):
+    projects = Project.objects.all()
+    return render(request, 'project/list.html', {'projects': projects})
+
+@login_required
+def project_detail(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    tasks = Task.objects.filter(project=project)
+    return render(request, 'project/detail.html', {'project': project, 'tasks': tasks})
+
+@login_required
+def project_create(request):
+    if request.method == 'POST':
+        form = ProjectForm(request.POST)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.created_by = request.user
+            project.save()
+            messages.success(request, 'Project created successfully.')
+            return redirect('project_detail', pk=project.pk)
+    else:
+        form = ProjectForm()
+    return render(request, 'project/form.html', {'form': form})
+
+@login_required
+def project_update(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Project updated successfully.')
+            return redirect('project_detail', pk=project.pk)
+    else:
+        form = ProjectForm(instance=project)
+    return render(request, 'project/form.html', {'form': form, 'project': project})
+
+@login_required
+def task_create(request, project_pk):
+    project = get_object_or_404(Project, pk=project_pk)
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.project = project
+            task.created_by = request.user
+            task.save()
+            messages.success(request, 'Task created successfully.')
+            return redirect('project_detail', pk=project.pk)
+    else:
+        form = TaskForm()
+    return render(request, 'core/form.html', {'form': form, 'project': project})
+
+
+@login_required
+def create_task(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.created_by = request.user
+            task.save()
+            form.save_m2m()  # Save many-to-many relationships
+            messages.success(request, 'Task created successfully.')
+            return redirect('task_list')
+    else:
+        form = TaskForm()
+    
+    projects = Project.objects.all()
+    return render(request, 'core/create_task.html', {'form': form, 'projects': projects})
+
+@login_required
+def task_list(request):
+    tasks = Task.objects.all().order_by('-created_at')
+    return render(request, 'core/task_list.html', {'tasks': tasks})
+
+
+@login_required
+def task_detail(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    return render(request, 'task/task_detail.html', {'task': task})
+
+@login_required
+def task_update(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    
+    # Check if the user has permission to update the task
+    if request.user != task.created_by and not request.user.is_staff:
+        return HttpResponseForbidden("You don't have permission to edit this task.")
+    
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Task updated successfully.')
+            return redirect('task_detail', task_id=task.id)
+    else:
+        form = TaskForm(instance=task)
+    
+    return render(request, 'task/task_update.html', {'form': form, 'task': task})
+
+@login_required
+def task_delete(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    
+    # Check if the user has permission to delete the task
+    if request.user != task.created_by and not request.user.is_staff:
+        return HttpResponseForbidden("You don't have permission to delete this task.")
+    
+    if request.method == 'POST':
+        task.delete()
+        messages.success(request, 'Task deleted successfully.')
+        return redirect('task_list')
+    
+    return render(request, 'task/task_delete.html', {'task': task})
+
+
+@login_required
+def user_search(request):
+    query = request.GET.get('q', '')
+    users = User.objects.filter(
+        Q(first_name__icontains=query) | 
+        Q(last_name__icontains=query) | 
+        Q(email__icontains=query)
+    )[:10]  # Limit to 10 results
+    data = [{'id': user.id, 'text': f"{user.get_full_name()} ({user.email})"} for user in users]
+    return JsonResponse({'results': data})
+
+@login_required
+def announcement_create(request):
+    if request.method == 'POST':
+        form = AnnouncementForm(request.POST)
+        if form.is_valid():
+            announcement = form.save(commit=False)
+            announcement.created_by = request.user
+            announcement.save()
+            messages.success(request, 'Announcement created successfully.')
+            return redirect('announcement_list')
+    else:
+        form = AnnouncementForm()
+    return render(request, 'announcement/form.html', {'form': form})
+
+
+@login_required
+def announcement_list(request):
+    announcements = Announcement.objects.all().order_by('-created_at')
+    return render(request, 'announcement/list.html', {'announcements': announcements})
+
+
+@login_required
+def notifications(request):
+    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'notifications.html', {'notifications': notifications})

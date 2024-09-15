@@ -6,6 +6,8 @@ from import_export.admin import ImportExportModelAdmin
 
 # Register your models here.
 admin.site.register(Role)
+admin.site.register(Workflow)
+admin.site.register(WorkflowInstance)
 admin.site.register(WorkflowStep)
 
 

@@ -1,187 +1,246 @@
 {% extends 'base_dashboard.html' %}
 {% load static %}
-{% load tailwind_tags %}
-
-{% block title %}Dashboard - {{ user.get_full_name }}{% endblock %}
+{% load humanize %}
 
 {% block dashboard_content %}
-
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-        Welcome, {{ user.get_full_name }}
-    </h1>
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Welcome, {{ user.get_full_name }}</h1>
 
-    <!-- Role-specific greeting -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-2xl font-bold text-primary dark:text-primary mb-2">
-            {% if user.role == 'DG' %}
-                Director General Dashboard
-            {% elif user.role == 'DIR' %}
-                Director Dashboard
-            {% elif user.role == 'ZD' %}
-                Zonal Director Dashboard
-            {% elif user.role == 'HOD' %}
-                Head of Department Dashboard
-            {% elif user.role == 'HOU' %}
-                Head of Unit Dashboard
-            {% elif user.role == 'IT_ADMIN' %}
-                IT Admin Dashboard
-            {% else %}
-                Staff Dashboard
-            {% endif %}
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300">
-            {% if user.role == 'DG' %}
-                You have full access to all system features and reports.
-            {% elif user.role in 'DIR,ZD' %}
-                You can manage departments and view comprehensive reports.
-            {% elif user.role == 'HOD' %}
-                You can manage your department and view departmental reports.
-            {% elif user.role == 'HOU' %}
-                You can manage your unit and view unit-specific reports.
-            {% elif user.role == 'IT_ADMIN' %}
-                You have access to system management and configuration.
-            {% else %}
-                You can view your tasks and department updates.
-            {% endif %}
-        </p>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition duration-300 ease-in-out hover:shadow-lg">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Total Employees</h3>
-            <p class="text-3xl font-bold text-primary dark:text-primary">{{ total_employees }}</p>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition duration-300 ease-in-out hover:shadow-lg">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Departments</h3>
-            <p class="text-3xl font-bold text-secondary dark:text-secondary">{{ total_departments }}</p>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition duration-300 ease-in-out hover:shadow-lg">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Active Projects</h3>
-            <p class="text-3xl font-bold text-green-600 dark:text-green-400">{{ active_projects }}</p>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition duration-300 ease-in-out hover:shadow-lg">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Pending Tasks</h3>
-            <p class="text-3xl font-bold text-red-600 dark:text-red-400">{{ pending_tasks }}</p>
+    <!-- Quick Actions -->
+    <div class="mb-8">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <a href="{% url 'create_task' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded text-center">
+                Create Task
+            </a>
+            <a href="{% url 'create_project' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded text-center">
+                Create Project
+            </a>
+            <a href="{% url 'create_announcement' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded text-center">
+                Create Announcement
+            </a>
+            <a href="{% url 'employee_list' %}" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded text-center">
+                View Employees
+            </a>
         </div>
     </div>
 
-    <!-- Role-specific content -->
-    {% if user.role == 'DG' %}
-        <!-- Director General specific content -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Department Overview</h3>
-                <ul class="space-y-2">
-                    {% for dept in department_stats %}
-                        <li class="flex justify-between items-center">
-                            <span class="text-gray-600 dark:text-gray-300">{{ dept.name }}</span>
-                            <span class="font-semibold text-primary dark:text-primary">{{ dept.employee_count }} employees</span>
-                        </li>
-                    {% endfor %}
-                </ul>
+    <!-- Role-based content -->
+    {% if user_role in 'DG,HOD,ADMIN' %}
+    <!-- Management Dashboard -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Employees</dt>
+                            <dd class="text-2xl font-semibold text-gray-900 dark:text-white">{{ total_employees }}</dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Hires</h3>
-                <ul class="space-y-2">
-                    {% for employee in recent_hires %}
-                        <li class="flex justify-between items-center">
-                            <span class="text-gray-600 dark:text-gray-300">{{ employee.get_full_name }}</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">Joined: {{ employee.date_joined|date:"M d, Y" }}</span>
-                        </li>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active Projects</dt>
+                            <dd class="text-2xl font-semibold text-gray-900 dark:text-white">{{ active_projects }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Completed Projects</dt>
+                            <dd class="text-2xl font-semibold text-gray-900 dark:text-white">{{ completed_projects }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-red-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">New Employees (30 days)</dt>
+                            <dd class="text-2xl font-semibold text-gray-900 dark:text-white">{{ new_employees }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Employees</h3>
+                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for employee in recent_employees %}
+                    <li class="py-4 flex items-center">
+                        <img class="h-10 w-10 rounded-full" src="{{ employee.profile_picture.url }}" alt="{{ employee.get_full_name }}">
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ employee.get_full_name }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Joined {{ employee.date_joined|naturalday }}</p>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="py-4 text-sm text-gray-500 dark:text-gray-400">No recent employees.</li>
                     {% endfor %}
                 </ul>
             </div>
         </div>
-    {% elif user.role == 'DIR' or user.role == 'ZD' %}
-        <!-- Director and Zonal Director specific content -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Managed Departments</h3>
-                <ul class="space-y-2">
-                    {% for dept in managed_departments %}
-                        <li class="flex justify-between items-center">
-                            <span class="text-gray-600 dark:text-gray-300">{{ dept.name }}</span>
-                            <span class="font-semibold text-primary dark:text-primary">{{ dept.employees.count }} employees</span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Department Projects</h3>
-                <ul class="space-y-2">
-                    {% for project in department_projects %}
-                        <li class="flex justify-between items-center">
-                            <span class="text-gray-600 dark:text-gray-300">{{ project.name }}</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">Start: {{ project.start_date|date:"M d, Y" }}</span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    {% elif user.role == 'HOD' or user.role == 'HOU' %}
-        <!-- HOD and HOU specific content -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Department: {{ department.name }}</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-2">Total Employees: <span class="font-semibold text-primary dark:text-primary">{{ department_employees }}</span></p>
-                <p class="text-gray-600 dark:text-gray-300">Pending Tasks: <span class="font-semibold text-red-600 dark:text-red-400">{{ pending_tasks }}</span></p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Department Projects</h3>
-                <ul class="space-y-2">
-                    {% for project in department_projects %}
-                        <li class="flex justify-between items-center">
-                            <span class="text-gray-600 dark:text-gray-300">{{ project.name }}</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">Status: {{ project.get_status_display }}</span>
-                        </li>
+
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Projects</h3>
+                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for project in recent_projects %}
+                    <li class="py-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ project.name }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Created {{ project.created_at|naturalday }}</p>
+                            </div>
+                            <div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                    {% if project.status == 'COMPLETED' %}bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100
+                                    {% elif project.status == 'ACTIVE' %}bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100
+                                    {% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100{% endif %}">
+                                    {{ project.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="py-4 text-sm text-gray-500 dark:text-gray-400">No recent projects.</li>
                     {% endfor %}
                 </ul>
             </div>
         </div>
+    </div>
     {% else %}
-        <!-- Regular staff and IT Admin specific content -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">My Tasks</h3>
-                <ul class="space-y-2">
+    <!-- Regular Staff Dashboard -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">My Tasks</h3>
+                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                     {% for task in my_tasks %}
-                        <li class="flex justify-between items-center">
-                            <span class="text-gray-600 dark:text-gray-300">{{ task.title }}</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">Due: {{ task.due_date|date:"M d, Y" }}</span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">My Projects</h3>
-                <ul class="space-y-2">
-                    {% for project in my_projects %}
-                        <li class="flex justify-between items-center">
-                            <span class="text-gray-600 dark:text-gray-300">{{ project.name }}</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">Status: {{ project.get_status_display }}</span>
-                        </li>
+                    <li class="py-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ task.title }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Due: {{ task.due_date|date:"M d, Y" }}</p>
+                            </div>
+                            <div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                    {% if task.status == 'COMPLETED' %}bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100
+                                    {% elif task.status == 'IN_PROGRESS' %}bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100
+                                    {% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100{% endif %}">
+                                    {{ task.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="py-4 text-sm text-gray-500 dark:text-gray-400">No tasks assigned.</li>
                     {% endfor %}
                 </ul>
             </div>
         </div>
+
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">My Projects</h3>
+                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for project in my_projects %}
+                    <li class="py-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ project.name }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Status: {{ project.get_status_display }}</p>
+                            </div>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="py-4 text-sm text-gray-500 dark:text-gray-400">No projects assigned.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
     {% endif %}
 
-    <!-- Common section for all roles -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Announcements</h3>
-        <ul class="space-y-4">
-            {% for announcement in recent_announcements %}
-                <li class="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0 last:pb-0">
-                    <h4 class="text-lg font-semibold text-primary dark:text-primary">{{ announcement.title }}</h4>
-                    <p class="text-gray-600 dark:text-gray-300">{{ announcement.content|truncatewords:30 }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Posted on: {{ announcement.created_at|date:"M d, Y" }}</p>
-                </li>
-            {% empty %}
-                <li class="text-gray-600 dark:text-gray-300">No recent announcements.</li>
-            {% endfor %}
-        </ul>
+    <!-- Common for all users -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Announcements</h3>
+                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for announcement in recent_announcements %}
+                    <li class="py-4">
+                        <div class="flex space-x-3">
+                            <div class="flex-1 space-y-1">
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">{{ announcement.title }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ announcement.content|truncatechars:100 }}</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500">{{ announcement.created_at|naturaltime }}</p>
+                            </div>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="py-4 text-sm text-gray-500 dark:text-gray-400">No recent announcements.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">My Task Summary</h3>
+                <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div class="px-4 py-5 bg-gray-50 dark:bg-gray-700 shadow rounded-lg overflow-hidden sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Tasks</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{{ my_tasks_count }}</dd>
+                    </div>
+                    <div class="px-4 py-5 bg-gray-50 dark:bg-gray-700 shadow rounded-lg overflow-hidden sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Overdue Tasks</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{{ my_overdue_tasks_count }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
     </div>
 </div>
-{% endblock %}
+{% endblock %}                    
