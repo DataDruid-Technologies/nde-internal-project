@@ -1,7 +1,10 @@
 from datetime import date, timedelta
+import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 """
 This module defines the core models for the NDE Internal Management System, including:
@@ -50,6 +53,24 @@ class User(AbstractUser):
     email = models.EmailField(unique=True, verbose_name="Email Address")
     ippis_number = models.CharField(
         max_length=8, unique=True, verbose_name="IPPIS Number")
+    
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+        related_name='custom_user_set',
+    # Add a unique related_name here
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name='custom_user_set', 
+    # Add a unique related_name here
+        
+    )
 
     objects = CustomUserManager()
 
@@ -345,3 +366,100 @@ class Employee(models.Model):
         ordering = ['surname', 'first_name']
         verbose_name = "Employee"
         verbose_name_plural = "Employees"
+        
+
+class File(models.Model):
+    file_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    file_name = models.CharField(max_length=255)
+    file_type = models.CharField(max_length=50)
+    file_size = models.IntegerField() 
+    description = models.TextField()
+    origin = models.CharField(max_length=255)
+    current_location = models.CharField(max_length=255)
+    status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('In Transit', 'In Transit'), ('Delivered', 'Delivered'), ('Archived', 'Archived')], default='Pending')
+
+class FileTransfer(models.Model):
+    file = models.ForeignKey(File, on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sent_files')
+    recipient = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='received_files')
+    transfer_date = models.DateTimeField(auto_now_add=True)
+    transfer_method = models.CharField(max_length=100)
+    transfer_details = models.TextField()
+    
+
+class ChatRoom(models.Model):
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    participants = models.ManyToManyField(User, related_name='chat_rooms')
+
+    def __str__(self):
+        return self.name
+
+class ChatMessage(models.Model):
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender.get_full_name()} in {self.room.name}: {self.content[:50]}"
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('INFO', 'Information'),
+        ('WARNING', 'Warning'),
+        ('ALERT', 'Alert'),
+        ('SUCCESS', 'Success'),
+    )
+
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=10, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    # For linking to specific objects (e.g., a leave request, a project, etc.)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    def __str__(self):
+        return f"{self.notification_type} for {self.recipient.get_full_name()}: {self.title}"
+
+class InternalMail(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_mails')
+    recipients = models.ManyToManyField(User, related_name='received_mails')
+    subject = models.CharField(max_length=255)
+    body = models.TextField()
+    attachment = models.FileField(upload_to='internal_mail_attachments/', null=True, blank=True)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    is_draft = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"From {self.sender.get_full_name()}: {self.subject}"
+
+class MailFolder(models.Model):
+    DEFAULT_FOLDERS = [
+        ('INBOX', 'Inbox'),
+        ('SENT', 'Sent'),
+        ('DRAFTS', 'Drafts'),
+        ('TRASH', 'Trash'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mail_folders')
+    name = models.CharField(max_length=50)
+    is_default = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.get_full_name()}'s {self.name} folder"
+
+class MailMessage(models.Model):
+    mail = models.ForeignKey(InternalMail, on_delete=models.CASCADE, related_name='mail_messages')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE)
+    folder = models.ForeignKey(MailFolder, on_delete=models.CASCADE)
+    is_read = models.BooleanField(default=False)
+    is_starred = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.recipient.get_full_name()}'s copy of {self.mail.subject}"
