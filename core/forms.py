@@ -1,47 +1,94 @@
-
+# core/forms.py
 from django import forms
-from .models import Employee, User
+from .models import Employee, Department, Zone, State, Unit
+from django import forms
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Submit
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import SetPasswordForm
+
 
 class LoginForm(forms.Form):
-    employee_id = forms.CharField(label='Employee ID')
-    password = forms.CharField(widget=forms.PasswordInput)
+    employee_id = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent bg-yellow-100', 'placeholder': 'Employee ID'})
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent bg-yellow-100', 'placeholder': 'Password'})
+    )
 
-class EmployeeForm(forms.ModelForm):
-    employee_id = forms.CharField(max_length=20)
-    email = forms.EmailField()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
+        self.helper.layout = Layout(
+            'employee_id',
+            'password',
+        )
+
+class PasswordChangeForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput)
+    confirm_password = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
         model = Employee
-        fields = ['employee_id', 'email', 'first_name', 'middle_name', 'surname', 'date_of_birth', 'gender',
-                  'marital_status', 'phone_number', 'residential_address', 'state_of_origin', 'lga_of_origin',
-                  'date_of_first_appointment', 'department', 'division', 'current_grade_level', 'current_step',
-                  'passport']
-        widgets = {
-            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
-            'date_of_first_appointment': forms.DateInput(attrs={'type': 'date'}),
-        }
+        fields = ['password']
+                               
 
-class UserCreationForm(forms.ModelForm):
-    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Confirm password', widget=forms.PasswordInput)
+User = get_user_model()
+
+class CustomPasswordResetForm(forms.Form):
+    email = forms.EmailField(
+        label="Email",
+        max_length=254,
+        widget=forms.EmailInput(attrs={'autocomplete': 'email', 'class': 'mt-1 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'})
+    )
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if not User.objects.filter(email=email).exists():
+            raise forms.ValidationError("There is no user registered with the specified email address.")
+        return email
+
+class CustomSetPasswordForm(SetPasswordForm):
+    new_password1 = forms.CharField(
+        label="New password",
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class': 'mt-1 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+        strip=False,
+    )
+    new_password2 = forms.CharField(
+        label="New password confirmation",
+        strip=False,
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class': 'mt-1 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+    )
+     
+                               
+class EmployeeCreationForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput)
+    confirm_password = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
-        model = User
-        fields = ['employee_id', 'email', 'ippis_number']
+        model = Employee
+        fields = ['employee_id', 'first_name', 'last_name', 'email', 'in_app_email', 'in_app_chat_name',
+                  'date_of_birth', 'date_of_first_appointment', 'current_role', 'current_zone', 'current_state',
+                  'current_department', 'current_grade_level', 'access_type']
 
-    def clean_password2(self):
-        password1 = self.cleaned_data.get("password1")
-        password2 = self.cleaned_data.get("password2")
-        if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Passwords don't match")
-        return password2
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+        if password != confirm_password:
+            raise forms.ValidationError("Passwords do not match")
+        return cleaned_data
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
-        if commit:
-            user.save()
-        return user
+class EmployeeUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = ['first_name', 'last_name', 'email', 'in_app_email', 'in_app_chat_name',
+                  'current_role', 'current_zone', 'current_state', 'current_department',
+                  'current_grade_level', 'access_type', 'active_status']
 
-class UserUploadForm(forms.Form):
-    csv_file = forms.FileField()
+class DataUploadForm(forms.Form):
+    file = forms.FileField()
+
+class UnitAssignmentForm(forms.Form):
+    unit = forms.ModelChoiceField(queryset=Unit.objects.all())
