@@ -44,13 +44,13 @@ class EmployeeDetail(models.Model):
     residential_address = models.CharField(
         max_length=150, blank=True, verbose_name="Residential Address")
     state_of_residence = models.ForeignKey(
-        State, on_delete=models.PROTECT, related_name='employees_residence', null=True, blank=True, verbose_name="State of Residence")
+        'State', on_delete=models.PROTECT, related_name='employees_residence', null=True, blank=True, verbose_name="State of Residence")
     lga_of_residence = models.ForeignKey(
-        LGA, on_delete=models.PROTECT, related_name='employees_residence', null=True, blank=True, verbose_name="LGA of Residence")  # Corrected related_name
+        'LGA', on_delete=models.PROTECT, related_name='employees_residence', null=True, blank=True, verbose_name="LGA of Residence")  # Corrected related_name
     state_of_origin = models.ForeignKey(
-        State, on_delete=models.PROTECT, related_name='employees_origin', null=True, blank=True, verbose_name="State of Origin")
+        'State', on_delete=models.PROTECT, related_name='employees_origin', null=True, blank=True, verbose_name="State of Origin")
     lga_of_origin = models.ForeignKey(
-        LGA, on_delete=models.PROTECT, related_name='employees_origin', null=True, blank=True, verbose_name="LGA of Origin")
+        'LGA', on_delete=models.PROTECT, related_name='employees_origin', null=True, blank=True, verbose_name="LGA of Origin")
 
     # Employment Details
     date_of_first_appointment = models.DateField(
@@ -61,24 +61,24 @@ class EmployeeDetail(models.Model):
         null=True, blank=True, verbose_name="Date of Confirmation")
     date_of_confirmation_exam = models.DateField(
         null=True, blank=True, verbose_name="Date When Confirmation Exam was taken")
-    cadre = models.CharField(max_length=1, choices=OfficialAppointment.CADRE_CHOICES,
+    cadre = models.CharField(max_length=1, choices='OfficialAppointment.CADRE_CHOICES',
                              null=True, blank=True, verbose_name="Cadre")
     current_grade_level = models.ForeignKey(
-        GradeLevel, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Current Grade Level")
+        'GradeLevel', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Current Grade Level")
     current_step = models.PositiveIntegerField(
         null=True, blank=True, verbose_name="Current Step")
     current_department = models.ForeignKey(
-        Department, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Department")
+        'Department', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Department")
     currrent_division = models.ForeignKey(
-        Division, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Division")
+        'Division', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Division")
     passport = models.ImageField(
         upload_to='employee_passports/', null=True, blank=True, verbose_name="Passport Photo")
     state_of_posting = models.ForeignKey(
-        State, on_delete=models.PROTECT, related_name='employees_posting', null=True, blank=True, verbose_name="State of Posting")
-    station = models.ForeignKey(LGA, on_delete=models.PROTECT, null=True,
+        'State', on_delete=models.PROTECT, related_name='employees_posting', null=True, blank=True, verbose_name="State of Posting")
+    station = models.ForeignKey('LGA', on_delete=models.PROTECT, null=True,
                                 blank=True, related_name='employees_lga_posting', verbose_name="Station")  # Corrected related_name
     present_appointment = models.ForeignKey(
-        OfficialAppointment, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Present Appointment")
+        'OfficialAppointment', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Present Appointment")
     last_promotion_date = models.DateField(
         null=True, blank=True, verbose_name="Last Promotion Date")
     retirement_date = models.DateField(
@@ -86,12 +86,12 @@ class EmployeeDetail(models.Model):
 
     # Financial Information
     bank = models.ForeignKey(
-        Bank, on_delete=models.PROTECT, blank=True, null=True)
+        'Bank', on_delete=models.PROTECT, blank=True, null=True)
     account_type = models.CharField(
         max_length=1, choices=ACCOUNT_TYPES, blank=True, null=True)
     account_number = models.CharField(max_length=10, validators=[
         RegexValidator(r'^\d{10}$')], blank=True, null=True)
-    pfa = models.ForeignKey(PFA, on_delete=models.PROTECT, null=True,
+    pfa = models.ForeignKey('PFA', on_delete=models.PROTECT, null=True,
                             blank=True, verbose_name='Pension Fund Administrator')
     pfa_number = models.CharField(max_length=12, blank=True, validators=[
         RegexValidator(r'^\d{12}$')], verbose_name="PFA PEN")
@@ -194,14 +194,14 @@ class EmployeeDetail(models.Model):
         return f"Employee Details for {self.employee.first_name} {self.employee.last_name}"
 
 class Promotion(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='promotions', verbose_name="Employee")
-    from_grade = models.ForeignKey(GradeLevel, on_delete=models.PROTECT, related_name='promotions_from', verbose_name="From Grade")
-    to_grade = models.ForeignKey(GradeLevel, on_delete=models.PROTECT, related_name='promotions_to', verbose_name="To Grade")
+    employee = models.ForeignKey('Employee', on_delete=models.CASCADE, related_name='promotions', verbose_name="Employee")
+    from_grade = models.ForeignKey('GradeLevel', on_delete=models.PROTECT, related_name='promotions_from', verbose_name="From Grade")
+    to_grade = models.ForeignKey('GradeLevel', on_delete=models.PROTECT, related_name='promotions_to', verbose_name="To Grade")
     from_step = models.PositiveIntegerField(verbose_name="From Step")
     to_step = models.PositiveIntegerField(verbose_name="To Step")
     promotion_date = models.DateField(verbose_name="Promotion Date")
     effective_date = models.DateField(verbose_name="Effective Date")
-    approved_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='approved_promotions', verbose_name="Approved By")
+    approved_by = models.ForeignKey('Employee', on_delete=models.SET_NULL, null=True, related_name='approved_promotions', verbose_name="Approved By")
     remarks = models.TextField(blank=True, verbose_name="Remarks")
 
     class Meta:
@@ -235,7 +235,7 @@ class Examination(models.Model):
         ('EXEMPTED', 'Exempted')
     ]
 
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='examinations', verbose_name="Employee")
+    employee = models.ForeignKey('Employee', on_delete=models.CASCADE, related_name='examinations', verbose_name="Employee")
     exam_type = models.CharField(max_length=20, choices=EXAM_TYPES, verbose_name="Examination Type")
     exam_date = models.DateField(verbose_name="Examination Date")
     exam_title = models.CharField(max_length=255, verbose_name="Examination Title")
@@ -294,8 +294,8 @@ class LeaveRequest(models.Model):
 
 class Transfer(models.Model):
     employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='transfers', verbose_name="Employee")
-    from_department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='transfers_from', verbose_name="From Department")
-    to_department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='transfers_to', verbose_name="To Department")
+    from_department = models.ForeignKey('Department', on_delete=models.CASCADE, related_name='transfers_from', verbose_name="From Department")
+    to_department = models.ForeignKey('Department', on_delete=models.CASCADE, related_name='transfers_to', verbose_name="To Department")
     transfer_date = models.DateField(verbose_name="Transfer Date")
     reason = models.TextField(verbose_name="Reason for Transfer")
     approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='approved_transfers', verbose_name="Approved By")
@@ -381,8 +381,8 @@ class Retirement(models.Model):
 
 class Repatriation(models.Model):
     employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='repatriations')
-    from_state = models.ForeignKey(State, on_delete=models.PROTECT, related_name='repatriations_from')
-    to_state = models.ForeignKey(State, on_delete=models.PROTECT, related_name='repatriations_to')
+    from_state = models.ForeignKey('State', on_delete=models.PROTECT, related_name='repatriations_from')
+    to_state = models.ForeignKey('State', on_delete=models.PROTECT, related_name='repatriations_to')
     repatriation_date = models.DateField()
     reason = models.TextField()
     approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='approved_repatriations')
@@ -415,7 +415,7 @@ class IPPISManagement(models.Model):
     ippis_number = models.CharField(max_length=20, unique=True)
     date_enrolled = models.DateField()
     last_updated = models.DateField(auto_now=True)
-    salary_grade = models.ForeignKey(GradeLevel, on_delete=models.PROTECT)
+    salary_grade = models.ForeignKey('GradeLevel', on_delete=models.PROTECT)
     salary_step = models.PositiveIntegerField()
 
     class Meta:

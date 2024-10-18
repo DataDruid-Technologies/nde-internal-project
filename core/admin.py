@@ -8,6 +8,12 @@ from .models import (
 
 
 # Model Admins
+
+class EmployeeAdmin(admin.ModelAdmin):
+    list_display = ('employee_id', 'first_name', 'last_name', 'email', 'current_role', 'active_status')
+    search_fields = ('first_name','employee_id')
+    
+    
 class ZoneAdmin(admin.ModelAdmin):
     list_display = ('name', 'code')
     search_fields = ('name', 'code')
@@ -51,6 +57,7 @@ class PFAAdmin(admin.ModelAdmin):
 
 # Register your models here
 admin.site.register(Zone, ZoneAdmin)
+admin.site.register(Employee, EmployeeAdmin)
 admin.site.register(State, StateAdmin)
 admin.site.register(LGA, LGAAdmin)
 admin.site.register(Department, DepartmentAdmin)

@@ -1,0 +1,54 @@
+<!-- core/templates/core/reports.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-4">Reports</h1>
+    
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold mb-2">Project Statuses</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {% for status in project_statuses %}
+            <div class="bg-white shadow rounded-lg p-4">
+                <h3 class="font-bold">{{ status.status }}</h3>
+                <p class="text-2xl">{{ status.count }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold mb-2">KPIs</h2>
+        <table class="w-full bg-white shadow rounded-lg">
+            <thead>
+                <tr>
+                    <th class="p-2 text-left">KPI</th>
+                    <th class="p-2 text-left">Value</th>
+                    <th class="p-2 text-left">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for kpi in kpis %}
+                <tr>
+                    <td class="p-2">{{ kpi.name }}</td>
+                    <td class="p-2">{{ kpi.value }}</td>
+                    <td class="p-2">{{ kpi.date|date:"Y-m-d" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div>
+        <h2 class="text-xl font-semibold mb-2">Upcoming Milestones</h2>
+        <ul class="bg-white shadow rounded-lg divide-y divide-gray-200">
+            {% for milestone in upcoming_milestones %}
+            <li class="p-4">
+                <h3 class="font-bold">{{ milestone.title }}</h3>
+                <p>Due: {{ milestone.due_date|date:"Y-m-d" }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

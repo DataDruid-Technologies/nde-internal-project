@@ -245,3 +245,64 @@ EMAIL_USE_TLS = False
 EMAIL_HOST_USER = 'info@nde-internal.org.ng'
 EMAIL_HOST_PASSWORD = '@ibukun.nde-internal'
 DEFAULT_FROM_EMAIL = 'info@nde-internal.org.ng' 
+
+
+# In settings.py
+
+# User Roles and Permissions
+USER_ROLES = [
+    ('DG', 'Director General'),
+    ('DIR', 'Director'),
+    ('ZD', 'Zonal Director'),
+    ('SC', 'State Coordinator'),
+    ('HOD', 'Head of Department'),
+    ('STAFF', 'Staff'),
+]
+
+# File access permissions
+FILE_ACCESS_PERMISSIONS = {
+    'DG': ['OPEN', 'SECRET', 'EMPLOYEE', 'CONTRACT'],
+    'DIR': ['OPEN', 'EMPLOYEE', 'CONTRACT'],
+    'ZD': ['OPEN', 'EMPLOYEE'],
+    'SC': ['OPEN', 'EMPLOYEE'],
+    'HOD': ['OPEN', 'EMPLOYEE'],
+    'STAFF': ['OPEN'],
+}
+
+# Task creation permissions
+TASK_CREATION_PERMISSIONS = ['DG', 'DIR', 'ZD', 'SC', 'HOD']
+
+# Announcement creation permissions
+ANNOUNCEMENT_CREATION_PERMISSIONS = ['DG', 'DIR', 'ZD', 'SC', 'HOD']
+
+# Leave approval chain
+LEAVE_APPROVAL_CHAIN = {
+    'STAFF': ['HOD', 'DIR', 'DG'],
+    'HOD': ['DIR', 'DG'],
+    'SC': ['ZD', 'DG'],
+    'ZD': ['DG'],
+    'DIR': ['DG'],
+}
+
+# Maximum file size for uploads (in bytes)
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5 MB
+
+# Password policy
+PASSWORD_MIN_LENGTH = 10
+PASSWORD_COMPLEXITY = {
+    'UPPER': 1,
+    'LOWER': 1,
+    'DIGITS': 1,
+    'SPECIAL': 1,
+}
+PASSWORD_HISTORY = 5  # Number of previous passwords to remember
+
+# Two-factor authentication settings
+TWO_FACTOR_AUTH_REQUIRED_ROLES = ['DG', 'DIR', 'ZD', 'SC', 'HOD']
+
+# Audit log settings
+AUDIT_LOG_RETENTION_DAYS = 365  # 1 year
+
+# File versioning
+ENABLE_FILE_VERSIONING = True
+MAX_FILE_VERSIONS = 10

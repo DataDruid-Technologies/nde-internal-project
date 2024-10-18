@@ -1,16 +1,29 @@
+# communication/views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
-from django.contrib import messages
-from django.core.mail import send_mail, send_mass_mail
-from django.conf import settings
+from django.http import JsonResponse
 from django.db.models import Q
-from django.core.paginator import Paginator
-from .models import *
-from .forms import *
-from core.models import *
-from datetime import datetime, timedelta
+from django.contrib import messages
+from django.utils import timezone
+from django.core.mail import send_mail
+from django.conf import settings
+from django.views import View
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from .models import (
+    InAppEmail, EmailAttachment, InAppChat, ChatMessage, ChatAttachment,
+    Notification, Task, DepartmentAnnouncement, Newsletter
+)
+from .forms import (
+    InAppEmailForm, ChatMessageForm, TaskForm, AnnouncementForm,
+    NewsletterForm
+)
+from core.models import Employee, Department
 
+# Email Views
 
 @login_required
 def inbox(request):
@@ -21,6 +34,14 @@ def inbox(request):
     return render(request, 'communication/inbox.html', {'page_obj': page_obj})
 
 @login_required
+def sent_emails(request):
+    emails = InAppEmail.objects.filter(sender=request.user).order_by('-sent_at')
+    paginator = Paginator(emails, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'communication/sent_emails.html', {'page_obj': page_obj})
+
+@login_required
 def compose_email(request):
     if request.method == 'POST':
         form = InAppEmailForm(request.POST, request.FILES)
@@ -28,21 +49,13 @@ def compose_email(request):
             email = form.save(commit=False)
             email.sender = request.user
             email.save()
-            form.save_m2m()  # This will now also save the attachments
+            form.save_m2m()
+            
+            # Handle attachments
+            for file in request.FILES.getlist('attachments'):
+                EmailAttachment.objects.create(email=email, file=file, filename=file.name)
             
             messages.success(request, 'Email sent successfully.')
-            
-            # Send notification to personal email if enabled
-            for recipient in email.recipients.all():
-                if recipient.notify_personal_email:
-                    send_mail(
-                        f'New in-app email: {email.subject}',
-                        f'You have received a new in-app email from {email.sender}. Log in to view the full message.',
-                        settings.DEFAULT_FROM_EMAIL,
-                        [recipient.email],
-                        fail_silently=True,
-                    )
-            
             return redirect('communication:inbox')
     else:
         form = InAppEmailForm()
@@ -50,32 +63,28 @@ def compose_email(request):
 
 @login_required
 def view_email(request, email_id):
-    email = get_object_or_404(InAppEmail, id=email_id, recipients=request.user)
-    if request.user not in email.is_read.all():
-        email.is_read.add(request.user)
-    return render(request, 'communication/view_email.html', {'email': email})
+    email = get_object_or_404(InAppEmail, id=email_id)
+    if request.user in email.recipients.all() or request.user == email.sender:
+        if request.user not in email.is_read.all():
+            email.is_read.add(request.user)
+        return render(request, 'communication/view_email.html', {'email': email})
+    else:
+        messages.error(request, "You don't have permission to view this email.")
+        return redirect('communication:inbox')
 
 @login_required
+@require_POST
 def delete_email(request, email_id):
-    email = get_object_or_404(InAppEmail, id=email_id, recipients=request.user)
-    email.recipients.remove(request.user)
-    messages.success(request, 'Email deleted successfully.')
+    email = get_object_or_404(InAppEmail, id=email_id)
+    if request.user in email.recipients.all() or request.user == email.sender:
+        email.delete()
+        messages.success(request, 'Email deleted successfully.')
+    else:
+        messages.error(request, "You don't have permission to delete this email.")
     return redirect('communication:inbox')
 
-@login_required
-def search_emails(request):
-    query = request.GET.get('q', '')
-    emails = InAppEmail.objects.filter(
-        recipients=request.user,
-        subject__icontains=query
-    ).order_by('-sent_at')
-    paginator = Paginator(emails, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'communication/search_results.html', {'page_obj': page_obj, 'query': query})
+# Chat Views
 
-
-# In app chat views
 @login_required
 def chat_list(request):
     chats = InAppChat.objects.filter(participants=request.user).order_by('-updated_at')
@@ -84,16 +93,18 @@ def chat_list(request):
 @login_required
 def create_chat(request):
     if request.method == 'POST':
-        participant_ids = request.POST.getlist('participants')
-        participants = Employee.objects.filter(id__in=participant_ids)
-        chat = InAppChat.objects.create(is_group_chat=len(participants) > 2)
-        chat.participants.add(request.user, *participants)
-        return redirect('communication:chat_detail', chat_id=chat.id)
+        participants = request.POST.getlist('participants')
+        if len(participants) > 1:
+            chat = InAppChat.objects.create(is_group_chat=len(participants) > 2)
+            chat.participants.add(request.user, *participants)
+            return redirect('communication:chat_room', chat_id=chat.id)
+        else:
+            messages.error(request, 'Please select at least one participant.')
     employees = Employee.objects.exclude(id=request.user.id)
     return render(request, 'communication/create_chat.html', {'employees': employees})
 
 @login_required
-def chat_detail(request, chat_id):
+def chat_room(request, chat_id):
     chat = get_object_or_404(InAppChat, id=chat_id, participants=request.user)
     messages = ChatMessage.objects.filter(chat=chat).order_by('timestamp')
     
@@ -104,59 +115,33 @@ def chat_detail(request, chat_id):
             message.chat = chat
             message.sender = request.user
             message.save()
-            chat.updated_at = message.timestamp
+            
+            # Handle attachments
+            for file in request.FILES.getlist('attachments'):
+                ChatAttachment.objects.create(message=message, file=file, filename=file.name)
+            
+            chat.updated_at = timezone.now()
             chat.save()
-            return redirect('communication:chat_detail', chat_id=chat.id)
+            
+            return JsonResponse({'status': 'success', 'message': 'Message sent.'})
     else:
         form = ChatMessageForm()
     
-    return render(request, 'communication/chat_detail.html', {
+    return render(request, 'communication/chat_room.html', {
         'chat': chat,
         'messages': messages,
         'form': form
     })
 
 @login_required
-def search_chats(request):
-    query = request.GET.get('q', '')
-    chats = InAppChat.objects.filter(
-        participants=request.user
-    ).filter(
-        Q(group_name__icontains=query) |
-        Q(participants__first_name__icontains=query) |
-        Q(participants__last_name__icontains=query)
-    ).distinct()
-    return render(request, 'communication/search_chats.html', {'chats': chats, 'query': query})
+@require_POST
+def leave_chat(request, chat_id):
+    chat = get_object_or_404(InAppChat, id=chat_id, participants=request.user)
+    chat.participants.remove(request.user)
+    messages.success(request, 'You have left the chat.')
+    return redirect('communication:chat_list')
 
-# Notifiation Views
-@login_required
-def notifications(request):
-    notifications = Notification.objects.filter(recipient=request.user).order_by('-timestamp')
-    paginator = Paginator(notifications, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'communication/notifications.html', {'page_obj': page_obj})
-
-@login_required
-def mark_notification_read(request, notification_id):
-    notification = Notification.objects.get(id=notification_id, recipient=request.user)
-    notification.is_read = True
-    notification.save()
-    return redirect('communication:notifications')
-
-@login_required
-def clear_all_notifications(request):
-    Notification.objects.filter(recipient=request.user).update(is_read=True)
-    return redirect('communication:notifications')
-
-
-
-# Tasks Views
-
-@login_required
-def task_list(request):
-    tasks = Task.objects.filter(assigned_to=request.user).order_by('-due_date')
-    return render(request, 'communication/task_list.html', {'tasks': tasks})
+# Task Views
 
 @login_required
 def create_task(request):
@@ -167,22 +152,21 @@ def create_task(request):
             task.assigned_by = request.user
             task.save()
             
+            # Send notification to assigned user
             Notification.objects.create(
                 recipient=task.assigned_to,
                 notification_type='TASK',
                 title=f'New Task: {task.title}',
-                content=f'You have been assigned a new task by {request.user.get_full_name()}.'
+                content=f'You have been assigned a new task: {task.title}'
             )
             
             # Send email notification
-            if task.assigned_to.notify_personal_email:
-                send_mail(
-                    f'New Task Assigned: {task.title}',
-                    f'You have been assigned a new task by {request.user.get_full_name()}. Due date: {task.due_date}',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [task.assigned_to.email],
-                    fail_silently=True,
-                )
+            send_mail(
+                subject=f'New Task Assignment: {task.title}',
+                message=f'You have been assigned a new task:\n\nTitle: {task.title}\nDue Date: {task.due_date}\nDescription: {task.description}',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[task.assigned_to.email],
+            )
             
             messages.success(request, 'Task created successfully.')
             return redirect('communication:task_list')
@@ -190,9 +174,32 @@ def create_task(request):
         form = TaskForm()
     return render(request, 'communication/create_task.html', {'form': form})
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
+class TaskListView(View):
+    def get(self, request):
+        assigned_tasks = Task.objects.filter(assigned_to=request.user).order_by('-due_date')
+        created_tasks = Task.objects.filter(assigned_by=request.user).order_by('-due_date')
+        return render(request, 'communication/task_list.html', {
+            'assigned_tasks': assigned_tasks,
+            'created_tasks': created_tasks
+        })
+
+@login_required
+def view_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if request.user != task.assigned_to and request.user != task.assigned_by:
+        messages.error(request, "You don't have permission to view this task.")
+        return redirect('communication:task_list')
+    return render(request, 'communication/view_task.html', {'task': task})
+
+
 @login_required
 def update_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
+    if request.user != task.assigned_to and request.user != task.assigned_by:
+        messages.error(request, "You don't have permission to update this task.")
+        return redirect('communication:task_list')
+    
     if request.method == 'POST':
         form = TaskForm(request.POST, instance=task)
         if form.is_valid():
@@ -204,82 +211,20 @@ def update_task(request, task_id):
     return render(request, 'communication/update_task.html', {'form': form, 'task': task})
 
 @login_required
-def delete_task(request, task_id):
-    task = get_object_or_404(Task, id=task_id)
-    task.delete()
-    messages.success(request, 'Task deleted successfully.')
+@require_POST
+def complete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id, assigned_to=request.user)
+    task.status = 'COMPLETED'
+    task.save()
+    messages.success(request, 'Task marked as completed.')
     return redirect('communication:task_list')
 
-@login_required
-def overdue_tasks_notification():
-    overdue_tasks = Task.objects.filter(
-        status__in=['PENDING', 'IN_PROGRESS'],
-        due_date__lt=datetime.now()
-    )
-    
-    for task in overdue_tasks:
-        Notification.objects.create(
-            recipient=task.assigned_to,
-            notification_type='TASK',
-            title=f'Overdue Task: {task.title}',
-            content=f'The task "{task.title}" is overdue. Please update its status or request an extension.'
-        )
-        
-        if task.assigned_to.notify_personal_email:
-            send_mail(
-                f'Overdue Task: {task.title}',
-                f'The task "{task.title}" assigned to you is overdue. Please log in to update its status or request an extension.',
-                settings.DEFAULT_FROM_EMAIL,
-                [task.assigned_to.email],
-                fail_silently=True,
-            )
-
-# This function should be called daily using a task scheduler like Celery
-def daily_summary():
-    yesterday = datetime.now() - timedelta(days=1)
-    employees = Employee.objects.all()
-    
-    for employee in employees:
-        new_tasks = Task.objects.filter(assigned_to=employee, created_at__date=yesterday.date())
-        unread_messages = InAppEmail.objects.filter(recipients=employee, sent_at__date=yesterday.date(), is_read__isnull=True)
-        new_chats = ChatMessage.objects.filter(chat__participants=employee, timestamp__date=yesterday.date(), is_read__isnull=True)
-        
-        if new_tasks or unread_messages or new_chats:
-            summary = f"Daily Summary for {yesterday.date()}:\n\n"
-            if new_tasks:
-                summary += f"New Tasks: {new_tasks.count()}\n"
-            if unread_messages:
-                summary += f"Unread Emails: {unread_messages.count()}\n"
-            if new_chats:
-                summary += f"Unread Chat Messages: {new_chats.count()}\n"
-            
-            Notification.objects.create(
-                recipient=employee,
-                notification_type='SYSTEM',
-                title='Daily Summary',
-                content=summary
-            )
-            
-            if employee.notify_personal_email:
-                send_mail(
-                    'NDE IMS - Daily Summary',
-                    summary,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [employee.email],
-                    fail_silently=True,
-                )
-                
 # Announcement Views
-
-@login_required
-def announcement_list(request):
-    announcements = DepartmentAnnouncement.objects.filter(department=request.user.current_department, is_active=True).order_by('-created_at')
-    return render(request, 'communication/announcement_list.html', {'announcements': announcements})
 
 @login_required
 def create_announcement(request):
     if not request.user.has_perm('communication.add_departmentannouncement'):
-        messages.error(request, 'You do not have permission to create announcements.')
+        messages.error(request, "You don't have permission to create announcements.")
         return redirect('communication:announcement_list')
     
     if request.method == 'POST':
@@ -287,75 +232,27 @@ def create_announcement(request):
         if form.is_valid():
             announcement = form.save(commit=False)
             announcement.author = request.user
-            announcement.department = request.user.current_department
             announcement.save()
-            
-            # Notify all department employees
-            employees = Employee.objects.filter(current_department=announcement.department)
-            for employee in employees:
-                Notification.objects.create(
-                    recipient=employee,
-                    notification_type='ANNOUNCEMENT',
-                    title=f'New Announcement: {announcement.title}',
-                    content=f'A new announcement has been posted in your department.'
-                )
-            
             messages.success(request, 'Announcement created successfully.')
             return redirect('communication:announcement_list')
     else:
         form = AnnouncementForm()
     return render(request, 'communication/create_announcement.html', {'form': form})
 
-@login_required
-def update_announcement(request, announcement_id):
-    announcement = get_object_or_404(DepartmentAnnouncement, id=announcement_id, department=request.user.current_department)
-    if not request.user.has_perm('communication.change_departmentannouncement'):
-        messages.error(request, 'You do not have permission to update announcements.')
-        return redirect('communication:announcement_list')
-    
-    if request.method == 'POST':
-        form = AnnouncementForm(request.POST, instance=announcement)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Announcement updated successfully.')
-            return redirect('communication:announcement_list')
-    else:
-        form = AnnouncementForm(instance=announcement)
-    return render(request, 'communication/update_announcement.html', {'form': form, 'announcement': announcement})
-
-
-@login_required
-def delete_announcement(request, announcement_id):
-    announcement = get_object_or_404(DepartmentAnnouncement, id=announcement_id, department=request.user.current_department)
-    if not request.user.has_perm('communication.delete_departmentannouncement'):
-        messages.error(request, 'You do not have permission to delete announcements.')
-        return redirect('communication:announcement_list')
-    
-    announcement.is_active = False
-    announcement.save()
-    messages.success(request, 'Announcement deleted successfully.')
-    return redirect('communication:announcement_list')
-
-@login_required
-def view_announcement(request, announcement_id):
-    announcement = get_object_or_404(DepartmentAnnouncement, id=announcement_id, department=request.user.current_department, is_active=True)
-    return render(request, 'communication/view_announcement.html', {'announcement': announcement})
-
+@method_decorator(cache_page(60 * 15), name='dispatch')
+class AnnouncementListView(View):
+    def get(self, request):
+        announcements = DepartmentAnnouncement.objects.filter(
+            Q(department=request.user.current_department) | Q(department__isnull=True)
+        ).order_by('-created_at')
+        return render(request, 'communication/announcement_list.html', {'announcements': announcements})
 
 # Newsletter Views
 
 @login_required
-def newsletter_list(request):
-    if request.user.has_perm('communication.view_newsletter'):
-        newsletters = Newsletter.objects.all().order_by('-created_at')
-    else:
-        newsletters = Newsletter.objects.filter(is_published=True, departments=request.user.current_department).order_by('-published_at')
-    return render(request, 'communication/newsletter_list.html', {'newsletters': newsletters})
-
-@login_required
 def create_newsletter(request):
     if not request.user.has_perm('communication.add_newsletter'):
-        messages.error(request, 'You do not have permission to create newsletters.')
+        messages.error(request, "You don't have permission to create newsletters.")
         return redirect('communication:newsletter_list')
     
     if request.method == 'POST':
@@ -364,102 +261,54 @@ def create_newsletter(request):
             newsletter = form.save(commit=False)
             newsletter.author = request.user
             newsletter.save()
-            form.save_m2m()  # Save many-to-many relationships
-            
-            if newsletter.is_published:
-                publish_newsletter(newsletter)
-            
             messages.success(request, 'Newsletter created successfully.')
             return redirect('communication:newsletter_list')
     else:
         form = NewsletterForm()
     return render(request, 'communication/create_newsletter.html', {'form': form})
 
-@login_required
-def update_newsletter(request, newsletter_id):
-    newsletter = get_object_or_404(Newsletter, id=newsletter_id)
-    if not request.user.has_perm('communication.change_newsletter'):
-        messages.error(request, 'You do not have permission to update newsletters.')
-        return redirect('communication:newsletter_list')
-    
-    if request.method == 'POST':
-        form = NewsletterForm(request.POST, instance=newsletter)
-        if form.is_valid():
-            was_published = newsletter.is_published
-            newsletter = form.save()
-            
-            if not was_published and newsletter.is_published:
-                publish_newsletter(newsletter)
-            
-            messages.success(request, 'Newsletter updated successfully.')
-            return redirect('communication:newsletter_list')
-    else:
-        form = NewsletterForm(instance=newsletter)
-    return render(request, 'communication/update_newsletter.html', {'form': form, 'newsletter': newsletter})
+@method_decorator(cache_page(60 * 15), name='dispatch')
+class NewsletterListView(View):
+    def get(self, request):
+        newsletters = Newsletter.objects.filter(is_published=True).order_by('-published_at')
+        return render(request, 'communication/newsletter_list.html', {'newsletters': newsletters})
+
+# Notification Views
 
 @login_required
-def delete_newsletter(request, newsletter_id):
-    newsletter = get_object_or_404(Newsletter, id=newsletter_id)
-    if not request.user.has_perm('communication.delete_newsletter'):
-        messages.error(request, 'You do not have permission to delete newsletters.')
-        return redirect('communication:newsletter_list')
-    
-    newsletter.delete()
-    messages.success(request, 'Newsletter deleted successfully.')
-    return redirect('communication:newsletter_list')
+def notification_list(request):
+    notifications = Notification.objects.filter(recipient=request.user).order_by('-timestamp')
+    return render(request, 'communication/notification_list.html', {'notifications': notifications})
 
 @login_required
-def view_newsletter(request, newsletter_id):
-    if request.user.has_perm('communication.view_newsletter'):
-        newsletter = get_object_or_404(Newsletter, id=newsletter_id)
-    else:
-        newsletter = get_object_or_404(Newsletter, id=newsletter_id, is_published=True, departments=request.user.current_department)
-    return render(request, 'communication/view_newsletter.html', {'newsletter': newsletter})
+@require_POST
+def mark_notification_read(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
+    notification.is_read = True
+    notification.save()
+    return JsonResponse({'status': 'success'})
 
-def publish_newsletter(newsletter):
-    newsletter.is_published = True
-    newsletter.published_at = timezone.now()
-    newsletter.save()
-    
-    # Create notifications for all employees in the target departments
-    target_employees = Employee.objects.filter(current_department__in=newsletter.departments.all())
-    for employee in target_employees:
-        Notification.objects.create(
-            recipient=employee,
-            notification_type='SYSTEM',
-            title=f'New Newsletter: {newsletter.title}',
-            content=f'A new newsletter has been published for your department.'
-        )
-    
-    # Send email notifications
-    email_messages = []
-    for employee in target_employees:
-        if employee.notify_personal_email:
-            email_messages.append((
-                f'New Newsletter: {newsletter.title}',
-                f'A new newsletter titled "{newsletter.title}" has been published for your department. Log in to the NDE IMS to read it.',
-                settings.DEFAULT_FROM_EMAIL,
-                [employee.email]
-            ))
-    
-    send_mass_mail(email_messages, fail_silently=True)
-    
-# Communication Log Views
+# Additional utility views
+
 @login_required
-def communication_log(request):
-    if not request.user.has_perm('communication.view_communicationlog'):
-        messages.error(request, 'You do not have permission to view communication logs.')
-        return redirect('core:dashboard')
-    
-    logs = CommunicationLog.objects.all().order_by('-timestamp')
-    paginator = Paginator(logs, 50)  # Show 50 logs per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'communication/communication_log.html', {'page_obj': page_obj})
+def search_employees(request):
+    query = request.GET.get('q', '')
+    employees = Employee.objects.filter(
+        Q(first_name__icontains=query) |
+        Q(last_name__icontains=query) |
+        Q(email__icontains=query)
+    )[:10]
+    results = [{'id': emp.id, 'text': f"{emp.get_full_name()} ({emp.email})"} for emp in employees]
+    return JsonResponse({'results': results})
 
-def log_communication(user, action_type, details=''):
-    CommunicationLog.objects.create(
-        user=user,
-        action_type=action_type,
-        details=details
-    )
+@login_required
+def communication_dashboard(request):
+    context = {
+        'unread_emails': InAppEmail.objects.filter(recipients=request.user).exclude(is_read=request.user).count(),
+        'pending_tasks': Task.objects.filter(assigned_to=request.user, status='PENDING').count(),
+        'unread_notifications': Notification.objects.filter(recipient=request.user, is_read=False).count(),
+        'recent_announcements': DepartmentAnnouncement.objects.filter(
+            Q(department=request.user.current_department) | Q(department__isnull=True)
+        ).order_by('-created_at')[:5],
+    }
+    return render(request, 'communication/dashboard.html', context)

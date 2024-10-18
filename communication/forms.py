@@ -97,4 +97,5 @@ class NewsletterForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'class': 'form-textarea'}),
             'is_published': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
         }
-        
+
+

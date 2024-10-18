@@ -7,6 +7,8 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 from django.db import models
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
+from hr.models import EmployeeDetail
 
 
 class CustomUserManager(BaseUserManager):
@@ -39,8 +41,10 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="First Name")
     last_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Last Name")
     email = models.EmailField(unique=True, verbose_name="Email Address")
+    employee_profile = models.OneToOneField(EmployeeDetail, on_delete=models.CASCADE, null=True, blank=True)
     in_app_email = models.EmailField(unique=True, blank=True, null=True, verbose_name="In-App Email")
     in_app_chat_name = models.CharField(max_length=100, unique=True, blank=True, null=True, verbose_name="In-App Chat Name")
+    phone_number = models.CharField(max_length=11, blank=True, null=True, verbose_name="Phone Number")
 
     date_of_birth = models.DateField(blank=True, null=True, verbose_name="Date of Birth")
     date_of_first_appointment = models.DateField(blank=True, null=True, verbose_name="Date of First Appointment")
@@ -58,7 +62,7 @@ class Employee(AbstractBaseUser, PermissionsMixin):
 
     current_department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, blank=True, related_name='employees', verbose_name="Department")
     current_grade_level = models.ForeignKey('GradeLevel', on_delete=models.SET_NULL, null=True, blank=True, related_name='employees', verbose_name="Grade Level")
-    password_change_required = models.BooleanField(default=False)
+    password_change_required = models.BooleanField(default=True)
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'employee_id'
@@ -79,6 +83,9 @@ class Employee(AbstractBaseUser, PermissionsMixin):
 
         super().save(*args, **kwargs)
 
+    def get_fill_name(self):
+        return f"{self.first_name} {self.last_name}"
+    
     def __str__(self):
         return f"{self.first_name or ''} {self.last_name or ''} ({self.employee_id})"
 
@@ -210,3 +217,80 @@ class Unit(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.department}"
+    
+
+
+class File(models.Model):
+    FILE_TYPES = [
+        ('OPEN', 'Open File'),
+        ('SECRET', 'Secret File'),
+        ('EMPLOYEE', 'Employee File'),
+        ('CONTRACT', 'Contract File'),
+    ]
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('ARCHIVED', 'Archived'),
+    ]
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    file_number = models.CharField(max_length=50, unique=True)
+    file_type = models.CharField(max_length=20, choices=FILE_TYPES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    current_department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, related_name='current_files')
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_files')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_files')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.file_number} - {self.title}"
+
+    class Meta:
+        ordering = ['-updated_at']
+
+class FileHistory(models.Model):
+    file = models.ForeignKey(File, on_delete=models.CASCADE, related_name='history')
+    action = models.CharField(max_length=255)
+    from_department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, related_name='file_history_from')
+    to_department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, related_name='file_history_to')
+    performed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.file.file_number} - {self.action}"
+
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name_plural = 'File histories'
+        
+
+class UserSettings(models.Model):
+    user = models.OneToOneField(Employee, on_delete=models.CASCADE)
+    theme = models.CharField(max_length=10, choices=[('light', 'Light'), ('dark', 'Dark')], default='light')
+    notification_preference = models.CharField(max_length=10, choices=[('email', 'Email'), ('in_app', 'In-App'), ('both', 'Both')], default='both')
+    language = models.CharField(max_length=5, choices=[('en', 'English'), ('fr', 'French')], default='en')
+
+class HelpArticle(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    category = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+    
+class Event(models.Model):
+    user = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    color = models.CharField(max_length=7, default="#3788d8")  # Hex color code
+
+    def __str__(self):
+        return self.title

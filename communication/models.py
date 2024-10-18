@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from core.models import Employee, Department
+from django.urls import reverse
 
 class InAppEmail(models.Model):
     sender = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='sent_emails', verbose_name="Sender")
@@ -45,6 +46,16 @@ class InAppChat(models.Model):
         verbose_name = "In-App Chat"
         verbose_name_plural = "In-App Chats"
 
+    def get_chat_name(self, user):
+        if self.is_group_chat:
+            return self.group_name or f"Group Chat {self.id}"
+        else:
+            other_participant = self.participants.exclude(id=user.id).first()
+            return f"{other_participant.get_full_name()}" if other_participant else "Chat"
+    
+    def get_absolute_url(self):
+        return reverse('communication:chat_room', args=[str(self.id)])
+    
     def __str__(self):
         if self.is_group_chat:
             return f"Group Chat: {self.group_name}"
@@ -56,6 +67,7 @@ class ChatMessage(models.Model):
     content = models.TextField(verbose_name="Message Content")
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Sent At")
     is_read = models.ManyToManyField(Employee, related_name='read_chat_messages', blank=True, verbose_name="Read By")
+
 
     class Meta:
         verbose_name = "Chat Message"
@@ -126,6 +138,7 @@ class Task(models.Model):
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='MEDIUM', verbose_name="Priority")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING', verbose_name="Status")
     due_date = models.DateTimeField(verbose_name="Due Date")
+    created_by = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='created_tasks', verbose_name="Created By")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
 
@@ -136,6 +149,22 @@ class Task(models.Model):
 
     def __str__(self):
         return f"{self.title} - Assigned to: {self.assigned_to}"
+
+class Subtask(models.Model):
+    task = models.ForeignKey('Task', on_delete=models.CASCADE, related_name='subtasks')
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=Task.STATUS_CHOICES, default='PENDING')
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    due_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['due_date', 'created_at']
 
 class DepartmentAnnouncement(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='announcements', verbose_name="Department")

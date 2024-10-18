@@ -1,0 +1,32 @@
+<!-- core/templates/core/help.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-4">Help Center</h1>
+    <div class="bg-white shadow rounded-lg p-6">
+        {% regroup help_articles by category as article_list %}
+        {% for category in article_list %}
+            <h2 class="text-xl font-semibold mb-2">{{ category.grouper }}</h2>
+            <ul class="mb-6">
+                {% for article in category.list %}
+                    <li class="mb-2">
+                        <a href="#article-{{ article.id }}" class="text-green-600 hover:text-green-800">{{ article.title }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </div>
+    
+    <div class="mt-8">
+        {% for article in help_articles %}
+            <div id="article-{{ article.id }}" class="bg-white shadow rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-2">{{ article.title }}</h2>
+                <div class="prose">
+                    {{ article.content|safe }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

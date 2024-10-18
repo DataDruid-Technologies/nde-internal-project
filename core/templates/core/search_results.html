@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - NDE IMS{% endblock %}
+
+{% block header %}Search Results for "{{ query }}"{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+            Search Results
+        </h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+            Showing results for "{{ query }}"
+        </p>
+    </div>
+    <div class="border-t border-gray-200">
+        {% if results.employees or results.tasks or results.announcements %}
+            {% if user_permissions.can_view_employees and results.employees %}
+                <div class="px-4 py-5 sm:px-6">
+                    <h4 class="text-lg font-medium text-gray-900">Employees</h4>
+                    <ul class="mt-3 divide-y divide-gray-200">
+                        {% for employee in results.employees %}
+                            <li class="py-4">
+                                <a href="{% url 'core:employee_detail' employee.id %}" class="block hover:bg-gray-50">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
+                                                <svg class="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 truncate">
+                                                {{ employee.get_full_name }}
+                                            </p>
+                                            <p class="text-sm text-gray-500 truncate">
+                                                {{ employee.email }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% if user_permissions.can_view_tasks and results.tasks %}
+                <div class="px-4 py-5 sm:px-6 {% if results.employees %}border-t border-gray-200{% endif %}">
+                    <h4 class="text-lg font-medium text-gray-900">Tasks</h4>
+                    <ul class="mt-3 divide-y divide-gray-200">
+                        {% for task in results.tasks %}
+                            <li class="py-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            {{ task.title }}
+                                        </p>
+                                        <p class="mt-1 text-sm text-gray-500">
+                                            {{ task.description|truncatechars:100 }}
+                                        </p>
+                                    </div>
+                                    <div class="ml-4 flex-shrink-0">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if task.status == 'COMPLETED' %}bg-green-100 text-green-800{% elif task.status == 'IN_PROGRESS' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                            {{ task.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-500">
+                                    Due: {{ task.due_date|date:"M d, Y" }}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% if user_permissions.can_view_announcements and results.announcements %}
+                <div class="px-4 py-5 sm:px-6 {% if results.employees or results.tasks %}border-t border-gray-200{% endif %}">
+                    <h4 class="text-lg font-medium text-gray-900">Announcements</h4>
+                    <ul class="mt-3 divide-y divide-gray-200">
+                        {% for announcement in results.announcements %}
+                            <li class="py-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ announcement.title }}</p>
+                                    <p class="mt-1 text-sm text-gray-500">{{ announcement.content|truncatechars:100 }}</p>
+                                    <p class="mt-2 text-xs text-gray-400">Posted on: {{ announcement.created_at|date:"M d, Y" }}</p>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="px-4 py-5 sm:px-6">
+                <p class="text-gray-500">No results found for "{{ query }}"</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -9,8 +9,10 @@ urlpatterns = [
     path('', login_required(dashboard), name='root'),
     path('login/', login_view, name='login'),
     path('', include('core.urls')),
-    path('/communication/', include('communication.urls')),
-    path('hr/', include('hr.urls')),
-    path('finance/', include('finance.urls')),
+    # path('/communication/', include('communication.urls')),
+    # path('hr/', include('hr.urls')),
+    # path('finance/', include('finance.urls')),
+    # path('monitoring/', include('monitoring.urls')),
+    # path('programs/', include('programs.urls')),
     path('__reload__/', include('django_browser_reload.urls')),
 ]

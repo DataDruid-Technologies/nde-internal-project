@@ -1,0 +1,55 @@
+{% load static %}
+
+<!-- Dashboard -->
+<a href="{% url 'core:dashboard' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.resolver_match.url_name == 'dashboard' %}text-green-600 bg-gray-100{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+    <i class="fas fa-tachometer-alt mr-3 h-6 w-6"></i>
+    <span class="sidebar-text">Dashboard</span>
+</a>
+
+{% comment %} <!-- Human Resources -->
+<a href="{% url 'core:employee_list' %}" class="mt-1 group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if 'hr' in request.resolver_match.app_name %}text-green-600 bg-gray-100{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+    <i class="fas fa-users mr-3 h-6 w-6"></i>
+    <span class="sidebar-text">Human Resources</span>
+</a>
+
+<!-- Finance -->
+<a href="{% url 'finance:dashboard' %}" class="mt-1 group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if 'finance' in request.resolver_match.app_name %}text-green-600 bg-gray-100{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+    <i class="fas fa-chart-line mr-3 h-6 w-6"></i>
+    <span class="sidebar-text">Finance</span>
+</a>
+
+<!-- Programs -->
+<a href="{% url 'programs:program_list' %}" class="mt-1 group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if 'programs' in request.resolver_match.app_name %}text-green-600 bg-gray-100{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+    <i class="fas fa-project-diagram mr-3 h-6 w-6"></i>
+    <span class="sidebar-text">Programs</span>
+</a>
+
+<!-- Monitoring -->
+<a href="{% url 'monitoring:dashboard' %}" class="mt-1 group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if 'monitoring' in request.resolver_match.app_name %}text-green-600 bg-gray-100{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+    <i class="fas fa-chart-bar mr-3 h-6 w-6"></i>
+    <span class="sidebar-text">Monitoring</span>
+</a>
+
+<!-- Communications -->
+<a href="{% url 'communication:dashboard' %}" class="mt-1 group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if 'communication' in request.resolver_match.app_name %}text-green-600 bg-gray-100{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+    <i class="fas fa-comments mr-3 h-6 w-6"></i>
+    <span class="sidebar-text">Communications</span>
+</a> {% endcomment %}
+
+{% comment %} <!-- File Tracking -->
+<a href="{% url 'core:file_tracking' %}" class="mt-1 group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.resolver_match.url_name == 'file_tracking' %}text-green-600 bg-gray-100{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+    <i class="fas fa-file-alt mr-3 h-6 w-6"></i>
+    <span class="sidebar-text">File Tracking</span>
+</a>
+
+<!-- Reports -->
+<a href="{% url 'core:reports' %}" class="mt-1 group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.resolver_match.url_name == 'reports' %}text-green-600 bg-gray-100{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+    <i class="fas fa-file-pdf mr-3 h-6 w-6"></i>
+    <span class="sidebar-text">Reports</span>
+</a> {% endcomment %}
+
+<!-- Settings -->
+<a href="#" class="mt-1 group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.resolver_match.url_name == 'settings' %}text-green-600 bg-gray-100{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+    <i class="fas fa-cog mr-3 h-6 w-6"></i>
+    <span class="sidebar-text">Settings</span>
+</a>
